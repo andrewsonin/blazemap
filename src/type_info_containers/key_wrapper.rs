@@ -1,0 +1,144 @@
+use std::borrow::Borrow;
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
+use std::hash::Hash;
+use std::ops::Deref;
+
+#[cfg(not(loom))]
+use once_cell::sync::Lazy;
+
+use crate::prelude::BlazeMapId;
+use crate::sync::RwLock;
+use crate::traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey};
+
+/// Global, statically initialized container with correspondence mapping
+/// between blazemap offset wrappers and original keys.
+#[cfg(not(loom))]
+#[doc(hidden)]
+#[derive(Debug)]
+pub struct StaticContainer<K> {
+    offset_to_orig: Vec<K>,
+    orig_to_offset: Lazy<HashMap<K, usize>>,
+}
+
+/// Loom-testable version of the above container.
+/// Note that it cannot be actually static
+/// due to the [`loom` inability](https://github.com/tokio-rs/loom/issues/290)
+/// to test statically initialized code.
+#[cfg(loom)]
+#[doc(hidden)]
+#[derive(Debug)]
+pub struct StaticContainer<K> {
+    offset_to_orig: Vec<K>,
+    orig_to_offset: HashMap<K, usize>,
+}
+
+impl<K> StaticContainer<K> {
+    /// Creates a new instance of [`StaticContainer`].
+    #[inline]
+    #[must_use]
+    #[cfg(not(loom))]
+    pub const fn new() -> Self {
+        Self {
+            offset_to_orig: vec![],
+            orig_to_offset: Lazy::new(Default::default),
+        }
+    }
+
+    /// Creates a new instance of [`StaticContainer`].
+    ///
+    /// # Safety
+    /// Mustn't be used outside of loom tests,
+    /// since there is no guarantee that one [`BlazeMapId`](crate::prelude::BlazeMapId)
+    /// doesn't interact with different containers of the same type.
+    #[inline]
+    #[must_use]
+    #[cfg(loom)]
+    pub fn new() -> Self {
+        Self {
+            offset_to_orig: vec![],
+            orig_to_offset: HashMap::new(),
+        }
+    }
+}
+
+impl<K, I> WrapKey<I> for RwLock<StaticContainer<K>>
+where
+    K: Clone + Eq + Hash,
+    I: BlazeMapId<OrigType = K>,
+{
+    #[inline]
+    fn wrap_key(&self, key: K) -> I {
+        #[cfg(not(loom))]
+        let offset = self.read().orig_to_offset.get(&key).copied();
+        #[cfg(loom)]
+        let offset = self.read().unwrap().orig_to_offset.get(&key).copied();
+        unsafe {
+            if let Some(offset) = offset {
+                I::from_offset_unchecked(offset)
+            } else {
+                #[cfg(not(loom))]
+                let mut guard = self.write();
+                #[cfg(loom)]
+                let mut guard = self.write().unwrap();
+                let container = &mut *guard;
+                let offset = match container.orig_to_offset.entry(key) {
+                    Entry::Vacant(entry) => {
+                        let offset = container.offset_to_orig.len();
+                        container.offset_to_orig.push(entry.key().clone());
+                        entry.insert(offset);
+                        offset
+                    }
+                    Entry::Occupied(entry) => *entry.get(),
+                };
+                drop(guard);
+                I::from_offset_unchecked(offset)
+            }
+        }
+    }
+}
+
+impl<K> TypeInfoContainer for RwLock<StaticContainer<K>>
+where
+    K: 'static,
+{
+    type OrigType = K;
+
+    #[inline]
+    fn capacity_info_provider(&self) -> impl Deref<Target = impl CapacityInfoProvider> {
+        #[cfg(not(loom))]
+        let result = self.read();
+        #[cfg(loom)]
+        let result = self.read().unwrap();
+        result
+    }
+
+    #[inline]
+    fn key_by_offset_provider(
+        &self,
+    ) -> impl Deref<Target = impl KeyByOffsetProvider<Self::OrigType>> {
+        #[cfg(not(loom))]
+        let result = self.read();
+        #[cfg(loom)]
+        let result = self.read().unwrap();
+        result
+    }
+}
+
+impl<K> CapacityInfoProvider for StaticContainer<K> {
+    #[inline]
+    fn offset_capacity(&self) -> usize {
+        self.offset_to_orig.len()
+    }
+}
+
+impl<K> KeyByOffsetProvider<K> for StaticContainer<K> {
+    #[inline]
+    unsafe fn key_by_offset_unchecked(&self, offset: usize) -> impl Borrow<K> {
+        #[cfg(not(loom))]
+        let result = self.offset_to_orig.get_unchecked(offset);
+        #[cfg(loom)]
+        let result = self.offset_to_orig.get(offset).unwrap();
+        result
+    }
+}
