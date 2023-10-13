@@ -1,0 +1,19 @@
+[package]
+name = "blazemap"
+version = "0.0.1"
+authors = ["Andrew Sonin <sonin.cel@yandex.ru>"]
+categories = ["data-structures"]
+description = "Provides a wrapper for replacing a small number of clumsy objects with identifiers, and also implements a vector-based slab-like map with an interface similar to that of HashMap."
+keywords = ["map", "slab", "hashmap"]
+license = "MIT"
+repository = "https://github.com/andrewsonin/blazemap"
+edition = "2021"
+
+[dependencies]
+derive_more = "0.99"
+once_cell = "1"
+parking_lot = "0.12"
+serde = { version = "1", optional = true, features = ["derive"] }
+
+[features]
+serde = ["dep:serde"]
