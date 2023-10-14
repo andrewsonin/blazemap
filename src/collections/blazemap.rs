@@ -273,6 +273,32 @@ impl<K, V> IntoIterator for BlazeMap<K, V>
     }
 }
 
+impl<'a, K, V> IntoIterator for &'a BlazeMap<K, V>
+    where
+        K: KeyWrapper
+{
+    type Item = (K, &'a V);
+    type IntoIter = Iter<'a, K, V>;
+
+    #[inline]
+    fn into_iter(self) -> Iter<'a, K, V> {
+        self.iter()
+    }
+}
+
+impl<'a, K, V> IntoIterator for &'a mut BlazeMap<K, V>
+    where
+        K: KeyWrapper
+{
+    type Item = (K, &'a mut V);
+    type IntoIter = IterMut<'a, K, V>;
+
+    #[inline]
+    fn into_iter(self) -> IterMut<'a, K, V> {
+        self.iter_mut()
+    }
+}
+
 impl<K, V> FromIterator<(K, V)> for BlazeMap<K, V>
     where
         K: KeyWrapper

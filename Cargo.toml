@@ -1,6 +1,6 @@
 [package]
 name = "blazemap"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Andrew Sonin <sonin.cel@yandex.ru>"]
 categories = ["data-structures"]
 description = "Provides a wrapper for replacing a small number of clumsy objects with identifiers, and also implements a vector-based slab-like map with an interface similar to that of HashMap."
