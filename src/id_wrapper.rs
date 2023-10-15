@@ -27,7 +27,7 @@ pub trait IdWrapper: Copy
     }
 
     #[doc(hidden)]
-    fn get_index(&self) -> usize;
+    fn get_index(self) -> usize;
 
     #[doc(hidden)]
     unsafe fn from_index_unchecked(index: usize) -> Self;

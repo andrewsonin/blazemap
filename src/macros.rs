@@ -114,7 +114,7 @@ macro_rules! blazemap_inner {
             type OrigType = $orig_type;
 
             #[inline]
-            fn get_index(&self) -> usize {
+            fn get_index(self) -> usize {
                 let Self(index) = self;
                 index.into_inner()
             }
