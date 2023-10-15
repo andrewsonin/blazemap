@@ -3,10 +3,10 @@
 _Provides a wrapper for replacing a small number of clumsy objects with identifiers, and also implements a vector-based
 slab-like map with an interface similar to that of `HashMap`._
 
-Let's imagine that in runtime you create a small number of clumsy objects that are used as keys in hashmaps.
+Let's imagine that at runtime you create a small number of clumsy objects that are used as keys in hashmaps.
 
 This crate allows you to seamlessly replace them with lightweight identifiers in a slab-like manner
-using the `register_blazemap_id` macro as well as using it as a key in the `BlazeMap`
+using the `register_blazemap_id` macro as well as using them as keys in the `BlazeMap`
 — a vector-based slab-like map with an interface similar to that of `HashMap`.
 
 ## Graphical representation of the old approach
