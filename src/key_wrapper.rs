@@ -5,7 +5,7 @@ use parking_lot::{RwLock, RwLockUpgradableReadGuard};
 use crate::utils::StaticInfo;
 
 /// Provides interface for `blazemap` key-wrapper types
-/// defined by the [`register_blazemap_key`](crate::register_blazemap_key) macro.
+/// defined by the [`register_blazemap_key`](crate::register_blazemap_id) macro.
 pub trait KeyWrapper: Copy
 {
     /// Original key type.

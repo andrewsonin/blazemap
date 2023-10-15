@@ -1,8 +1,6 @@
 use std::hash::Hash;
 
-use derive_more::Display;
-
-#[derive(Debug, Display, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
 #[doc(hidden)]
 pub struct PrivateIndex(usize);

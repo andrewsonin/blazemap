@@ -1,3 +1,8 @@
+//! Provides a [wrapper](register_blazemap_id) for replacing a small number
+//! of clumsy objects with identifiers,
+//! and also implements a [vector-based slab-like map](prelude::BlazeMap)
+//! with an interface similar to that of [`HashMap`](std::collections::HashMap).
+
 mod key_wrapper;
 #[doc(hidden)]
 pub mod utils;
@@ -10,7 +15,7 @@ pub mod prelude {
     pub use crate::{
         collections::blazemap::BlazeMap,
         key_wrapper::KeyWrapper,
-        register_blazemap_key,
+        register_blazemap_id,
     };
 }
 
@@ -25,16 +30,16 @@ pub mod external {
 #[cfg(test)]
 mod tests
 {
-    use crate::register_blazemap_key;
+    use crate::register_blazemap_id;
 
     #[cfg(feature = "serde")]
     mod serde_compatible
     {
-        use crate::register_blazemap_key;
+        use crate::register_blazemap_id;
 
-        register_blazemap_key! {
+        register_blazemap_id! {
             pub struct BlazeMapKeyExample(usize);
-            DERIVE AS FOR ORIGINAL TYPE: {
+            Derive(as for Original Type): {
                 Default,
                 Debug,
                 Display,
@@ -45,9 +50,9 @@ mod tests
         }
     }
 
-    register_blazemap_key! {
+    register_blazemap_id! {
         pub struct BlazeMapKeyExample(usize);
-        DERIVE AS FOR ORIGINAL TYPE: {
+        Derive(as for Original Type): {
             Default,
             Debug,
             Display,

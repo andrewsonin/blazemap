@@ -1,15 +1,42 @@
 /// Creates a new type that is compatible as a key-wrapper for `blazemap` collections.
 ///
+/// This macro supports optional inference of standard traits using the following syntax:
+///
+/// * `Derive(as for Original Type)` — derives traits as for the original type
+///   for which `blazemap_key` is being registered. Each call to methods on these traits
+///   requires an additional `.read` call on the internal synchronization primitive,
+///   so — all other things being equal — their calls may be less optimal
+///   than the corresponding calls on instances of the original key's type.
+///   This method supports inference of the following traits:
+///   * `Default`
+///   * `PartialOrd` (mutually exclusive with `Ord`)
+///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with `PartialOrd`)
+///   * `Debug`
+///   * `Display`
+///   * `Serialize` (with `serde` feature only)
+///   * `Deserialize` (with `serde` feature only)
+/// * `Derive(as for Serial Number)` — derives traits in the same way as for
+///   the serial number assigned when registering an instance of the original type
+///   the first time [`KeyWrapper::new`](crate::prelude::KeyWrapper::new) was called.
+///   Because methods inferred by this option do not require additional
+///   locking on synchronization primitives,
+///   they do not incur any additional overhead compared to methods inferred for plain `usize`.
+///   This method supports inference of the following traits:
+///   * `PartialOrd` (mutually exclusive with `Ord`)
+///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with `PartialOrd`)
+///
 /// # Example
 ///
 /// ```rust
-/// use blazemap::prelude::{BlazeMap, register_blazemap_key};
+/// use blazemap::prelude::{BlazeMap, register_blazemap_id};
 ///
-/// register_blazemap_key! {
+/// register_blazemap_id! {
 ///     pub struct BlazeMapKeyExample(&'static str);
-///     DERIVE AS FOR ORIGINAL TYPE: {  // Optional section
+///     Derive(as for Original Type): {  // Optional section
 ///         Debug,
 ///         Display,
+///     };
+///     Derive(as for Serial Number): {  // Optional section
 ///         Ord,
 ///     }
 /// }
@@ -26,7 +53,95 @@
 /// assert_eq!(format!("{map:?}"), r#"{"first": "1", "second": "2", "third": "3"}"#)
 /// ```
 #[macro_export]
-macro_rules! register_blazemap_key {
+macro_rules! register_blazemap_id {
+    (
+        $(#[$attrs:meta])*
+        $vis:vis
+        struct $new_type:ident($orig_type:ty)
+        $(;)?
+        $(Derive(as for Original Type): {$($to_derive_orig:ident),+ $(,)?} $(;)?)?
+        $(Derive(as for Serial Number): {$(  $to_derive_sn:ident),+ $(,)?} $(;)?)?
+    ) => {
+        $crate::blazemap_inner! {
+            $(#[$attrs])*
+            $vis
+            struct $new_type($orig_type)
+        }
+        $($($crate::blazemap_derive_key_inner!   {@DERIVE $to_derive_orig $new_type})*)?
+        $($($crate::blazemap_derive_assigned_sn! {@DERIVE   $to_derive_sn $new_type})*)?
+    };
+    (
+        $(#[$attrs:meta])*
+        $vis:vis
+        struct $new_type:ident($orig_type:ty)
+        $(;)?
+        $(Derive(as for Serial Number): {$(  $to_derive_sn:ident),+ $(,)?} $(;)?)?
+        $(Derive(as for Original Type): {$($to_derive_orig:ident),+ $(,)?} $(;)?)?
+    ) => {
+        $crate::blazemap_inner! {
+            $(#[$attrs])*
+            $vis
+            struct $new_type($orig_type)
+        }
+        $($($crate::blazemap_derive_key_inner!   {@DERIVE $to_derive_orig $new_type})*)?
+        $($($crate::blazemap_derive_assigned_sn! {@DERIVE   $to_derive_sn $new_type})*)?
+    }
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! blazemap_inner {
+    (
+        $(#[$attrs:meta])*
+        $vis:vis
+        struct $new_type:ident($orig_type:ty)
+    ) => {
+        $(#[$attrs])*
+        #[derive(Clone, Copy, Eq, PartialEq, Hash)]
+        #[repr(transparent)]
+        struct $new_type($crate::utils::PrivateIndex);
+
+        impl $new_type
+        {
+            #[inline]
+            pub fn new(value: $orig_type) -> Self {
+                <Self as $crate::prelude::KeyWrapper>::new(value)
+            }
+        }
+
+        impl $crate::prelude::KeyWrapper for $new_type
+        {
+            type OrigType = $orig_type;
+
+            #[inline]
+            fn get_index(&self) -> usize {
+                let Self(index) = self;
+                index.into_inner()
+            }
+
+            #[inline(always)]
+            unsafe fn from_index_unchecked(index: usize) -> Self {
+                Self($crate::utils::PrivateIndex::new(index))
+            }
+
+            #[inline]
+            fn static_info() -> &'static $crate::external::parking_lot::RwLock<$crate::utils::StaticInfo<$orig_type>>
+            {
+                use $crate::external::once_cell::sync::Lazy;
+                use $crate::external::parking_lot::RwLock;
+                use $crate::utils::StaticInfo;
+                static MAP: Lazy<RwLock<StaticInfo<$orig_type>>> = Lazy::new(
+                    || RwLock::new(StaticInfo::new())
+                );
+                &MAP
+            }
+        }
+    }
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! blazemap_derive_key_inner {
     (@DERIVE Default $new_type:ident) => {
         impl Default for $new_type
         {
@@ -142,64 +257,40 @@ macro_rules! register_blazemap_key {
                 }
             }
         }
-    };
-    (
-        $(#[$attrs:meta])*
-        $vis:vis
-        struct $new_type:ident($orig_type:ty)
-    ) => {
-        $(#[$attrs])*
-        #[derive(Clone, Copy, Eq, PartialEq, Hash)]
-        #[repr(transparent)]
-        struct $new_type($crate::utils::PrivateIndex);
+    }
+}
 
-        impl $new_type
+#[doc(hidden)]
+#[macro_export]
+macro_rules! blazemap_derive_assigned_sn {
+    (@DERIVE PartialOrd $new_type:ident) => {
+        impl PartialOrd for $new_type
         {
             #[inline]
-            pub fn new(value: $orig_type) -> Self {
-                <Self as $crate::prelude::KeyWrapper>::new(value)
-            }
-        }
-
-        impl $crate::prelude::KeyWrapper for $new_type
-        {
-            type OrigType = $orig_type;
-
-            #[inline]
-            fn get_index(&self) -> usize {
-                let Self(index) = self;
-                index.into_inner()
-            }
-
-            #[inline(always)]
-            unsafe fn from_index_unchecked(index: usize) -> Self {
-                Self($crate::utils::PrivateIndex::new(index))
-            }
-
-            #[inline]
-            fn static_info() -> &'static $crate::external::parking_lot::RwLock<$crate::utils::StaticInfo<$orig_type>>
-            {
-                use $crate::external::once_cell::sync::Lazy;
-                use $crate::external::parking_lot::RwLock;
-                use $crate::utils::StaticInfo;
-                static MAP: Lazy<RwLock<StaticInfo<$orig_type>>> = Lazy::new(
-                    || RwLock::new(StaticInfo::new())
-                );
-                &MAP
+            fn partial_cmp(&self, other: &Self) -> Option<::std::cmp::Ordering> {
+                let Self(lhs) = self;
+                let Self(rhs) = other;
+                lhs.into_inner().partial_cmp(&rhs.into_inner())
             }
         }
     };
-    (
-        $(#[$attrs:meta])*
-        $vis:vis
-        struct $new_type:ident($orig_type:ty);
-        DERIVE AS FOR ORIGINAL TYPE: {$($to_derive:ident),+ $(,)?}
-    ) => {
-        register_blazemap_key! {
-            $(#[$attrs])*
-            $vis
-            struct $new_type($orig_type)
+    (@DERIVE Ord $new_type:ident) => {
+        impl PartialOrd for $new_type
+        {
+            #[inline]
+            fn partial_cmp(&self, other: &Self) -> Option<::std::cmp::Ordering> {
+                Some(self.cmp(other))
+            }
         }
-        $(register_blazemap_key! {@DERIVE $to_derive $new_type})*
+
+        impl Ord for $new_type
+        {
+            #[inline]
+            fn cmp(&self, other: &Self) -> ::std::cmp::Ordering {
+                let Self(lhs) = self;
+                let Self(rhs) = other;
+                lhs.into_inner().cmp(&rhs.into_inner())
+            }
+        }
     }
 }
