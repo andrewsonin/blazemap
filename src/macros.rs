@@ -17,7 +17,7 @@
 ///   * `Deserialize` (with `serde` feature only)
 /// * `Derive(as for Serial Number)` — derives traits in the same way as for
 ///   the serial number assigned when registering an instance of the original type
-///   the first time [`KeyWrapper::new`](crate::prelude::KeyWrapper::new) was called.
+///   the first time [`IdWrapper::new`](crate::prelude::IdWrapper::new) was called.
 ///   Because methods inferred by this option do not require additional
 ///   locking on synchronization primitives,
 ///   they do not incur any additional overhead compared to methods inferred for plain `usize`.
@@ -105,11 +105,11 @@ macro_rules! blazemap_inner {
         {
             #[inline]
             pub fn new(value: $orig_type) -> Self {
-                <Self as $crate::prelude::KeyWrapper>::new(value)
+                <Self as $crate::prelude::IdWrapper>::new(value)
             }
         }
 
-        impl $crate::prelude::KeyWrapper for $new_type
+        impl $crate::prelude::IdWrapper for $new_type
         {
             type OrigType = $orig_type;
 
@@ -158,7 +158,7 @@ macro_rules! blazemap_derive_key_inner {
             fn partial_cmp(&self, other: &Self) -> Option<::std::cmp::Ordering> {
                 let Self(lhs) = self;
                 let Self(rhs) = other;
-                let guard = <Self as $crate::prelude::KeyWrapper>::static_info().read();
+                let guard = <Self as $crate::prelude::IdWrapper>::static_info().read();
                 let (lhs, rhs) = unsafe {
                     (
                         guard.get_key_unchecked(lhs.into_inner()),
@@ -184,7 +184,7 @@ macro_rules! blazemap_derive_key_inner {
             fn cmp(&self, other: &Self) -> ::std::cmp::Ordering {
                 let Self(lhs) = self;
                 let Self(rhs) = other;
-                let guard = <Self as $crate::prelude::KeyWrapper>::static_info().read();
+                let guard = <Self as $crate::prelude::IdWrapper>::static_info().read();
                 let (lhs, rhs) = unsafe {
                     (
                         guard.get_key_unchecked(lhs.into_inner()),
@@ -203,7 +203,7 @@ macro_rules! blazemap_derive_key_inner {
             {
                 let Self(index) = self;
                 let mut f = f.debug_struct(::std::stringify!($new_type));
-                let guard = <Self as $crate::prelude::KeyWrapper>::static_info().read();
+                let guard = <Self as $crate::prelude::IdWrapper>::static_info().read();
                 let original_key = unsafe { guard.get_key_unchecked(index.into_inner()) };
                 f.field("original_key", original_key);
                 drop(guard);
@@ -220,7 +220,7 @@ macro_rules! blazemap_derive_key_inner {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result
             {
                 let Self(index) = self;
-                let guard = <Self as $crate::prelude::KeyWrapper>::static_info().read();
+                let guard = <Self as $crate::prelude::IdWrapper>::static_info().read();
                 let original_key = unsafe { guard.get_key_unchecked(index.into_inner()) };
                 write!(f, "{original_key}")
             }
@@ -234,9 +234,9 @@ macro_rules! blazemap_derive_key_inner {
                 where
                     D: $crate::external::serde::Deserializer<'de>
             {
-                let original_key: <Self as $crate::prelude::KeyWrapper>::OrigType
+                let original_key: <Self as $crate::prelude::IdWrapper>::OrigType
                     = $crate::external::serde::Deserialize::deserialize(deserializer)?;
-                Ok(<Self as $crate::prelude::KeyWrapper>::new(original_key))
+                Ok(<Self as $crate::prelude::IdWrapper>::new(original_key))
             }
         }
     };
@@ -250,7 +250,7 @@ macro_rules! blazemap_derive_key_inner {
             {
                 let Self(index) = self;
                 unsafe {
-                    <Self as $crate::prelude::KeyWrapper>::static_info()
+                    <Self as $crate::prelude::IdWrapper>::static_info()
                         .read()
                         .get_key_unchecked(index.into_inner())
                         .serialize(serializer)

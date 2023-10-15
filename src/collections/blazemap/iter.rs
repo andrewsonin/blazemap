@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use std::panic::{RefUnwindSafe, UnwindSafe};
 
 use crate::collections::blazemap::BlazeMap;
-use crate::prelude::KeyWrapper;
+use crate::prelude::IdWrapper;
 
 /// An iterator over the entries of a [`BlazeMap`].
 ///
@@ -133,7 +133,7 @@ pub struct Drain<'a, K, V>
 
 impl<'a, K, V> Iterator for Iter<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     type Item = (K, &'a V);
 
@@ -169,7 +169,7 @@ impl<'a, K, V> Iterator for Iter<'a, K, V>
 
 impl<'a, K, V> ExactSizeIterator for Iter<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     #[inline]
     fn len(&self) -> usize {
@@ -179,7 +179,7 @@ impl<'a, K, V> ExactSizeIterator for Iter<'a, K, V>
 
 impl<'a, K, V> Iterator for IterMut<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     type Item = (K, &'a mut V);
 
@@ -209,7 +209,7 @@ impl<'a, K, V> Iterator for IterMut<'a, K, V>
 
 impl<'a, K, V> ExactSizeIterator for IterMut<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     #[inline]
     fn len(&self) -> usize {
@@ -219,7 +219,7 @@ impl<'a, K, V> ExactSizeIterator for IterMut<'a, K, V>
 
 impl<'a, K, V> Iterator for Keys<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     type Item = K;
 
@@ -255,7 +255,7 @@ impl<'a, K, V> Iterator for Keys<'a, K, V>
 
 impl<'a, K, V> ExactSizeIterator for Keys<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     #[inline]
     fn len(&self) -> usize {
@@ -338,7 +338,7 @@ impl<'a, K, V> ExactSizeIterator for ValuesMut<'a, K, V>
 
 impl<K, V> Iterator for IntoIter<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     type Item = (K, V);
 
@@ -362,7 +362,7 @@ impl<K, V> Iterator for IntoIter<K, V>
 
 impl<K, V> ExactSizeIterator for IntoIter<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     #[inline]
     fn len(&self) -> usize {
@@ -372,7 +372,7 @@ impl<K, V> ExactSizeIterator for IntoIter<K, V>
 
 impl<K, V> Iterator for IntoKeys<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     type Item = K;
 
@@ -396,7 +396,7 @@ impl<K, V> Iterator for IntoKeys<K, V>
 
 impl<K, V> ExactSizeIterator for IntoKeys<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     #[inline]
     fn len(&self) -> usize {
@@ -427,7 +427,7 @@ impl<K, V> Iterator for IntoValues<K, V>
 
 impl<K, V> ExactSizeIterator for IntoValues<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     #[inline]
     fn len(&self) -> usize {
@@ -437,7 +437,7 @@ impl<K, V> ExactSizeIterator for IntoValues<K, V>
 
 impl<'a, K, V> Iterator for Drain<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     type Item = (K, V);
 
@@ -469,7 +469,7 @@ impl<'a, K, V> Iterator for Drain<'a, K, V>
 
 impl<'a, K, V> ExactSizeIterator for Drain<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     #[inline]
     fn len(&self) -> usize {
@@ -540,7 +540,7 @@ impl<'a, K, V> Copy for Iter<'a, K, V> {}
 
 impl<'a, K, V> Debug for Iter<'a, K, V>
     where
-        K: KeyWrapper,
+        K: IdWrapper,
         K::OrigType: Debug,
         V: Debug
 {
@@ -559,7 +559,7 @@ impl<'a, K, V> Debug for Iter<'a, K, V>
 
 impl<'a, K, V> Debug for IterMut<'a, K, V>
     where
-        K: KeyWrapper,
+        K: IdWrapper,
         K::OrigType: Debug,
         V: Debug
 {
@@ -603,7 +603,7 @@ impl<'a, K, V> Copy for Values<'a, K, V> {}
 
 impl<'a, K, V> Debug for Keys<'a, K, V>
     where
-        K: KeyWrapper,
+        K: IdWrapper,
         K::OrigType: Debug
 {
     #[inline]
@@ -652,7 +652,7 @@ impl<'a, K, V> Debug for ValuesMut<'a, K, V>
 
 impl<K, V> Debug for IntoIter<K, V>
     where
-        K: KeyWrapper,
+        K: IdWrapper,
         K::OrigType: Debug,
         V: Debug
 {
@@ -664,7 +664,7 @@ impl<K, V> Debug for IntoIter<K, V>
 
 impl<K, V> Debug for IntoKeys<K, V>
     where
-        K: KeyWrapper,
+        K: IdWrapper,
         K::OrigType: Debug
 {
     #[inline]
@@ -685,7 +685,7 @@ impl<K, V> Debug for IntoValues<K, V>
 
 impl<'a, K, V> Debug for Drain<'a, K, V>
     where
-        K: KeyWrapper,
+        K: IdWrapper,
         K::OrigType: Debug,
         V: Debug
 {

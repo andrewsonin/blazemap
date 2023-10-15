@@ -3,7 +3,7 @@
 //! and also implements a [vector-based slab-like map](prelude::BlazeMap)
 //! with an interface similar to that of [`HashMap`](std::collections::HashMap).
 
-mod key_wrapper;
+mod id_wrapper;
 #[doc(hidden)]
 pub mod utils;
 /// Collection types.
@@ -14,7 +14,7 @@ mod macros;
 pub mod prelude {
     pub use crate::{
         collections::blazemap::BlazeMap,
-        key_wrapper::KeyWrapper,
+        id_wrapper::IdWrapper,
         register_blazemap_id,
     };
 }

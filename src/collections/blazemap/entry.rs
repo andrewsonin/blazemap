@@ -1,4 +1,4 @@
-use crate::prelude::KeyWrapper;
+use crate::prelude::IdWrapper;
 
 #[derive(Debug)]
 /// A view into a single entry in a map, which may either be vacant or occupied.
@@ -9,7 +9,7 @@ use crate::prelude::KeyWrapper;
 /// [`entry`]: crate::collections::blazemap::BlazeMap::entry
 pub enum Entry<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     /// An occupied entry.
     Occupied(OccupiedEntry<'a, K, V>),
@@ -22,7 +22,7 @@ pub enum Entry<'a, K, V>
 /// It is part of the [`Entry`] enum.
 pub struct OccupiedEntry<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     pub(in crate::collections::blazemap)
     key: K,
@@ -39,7 +39,7 @@ pub struct OccupiedEntry<'a, K, V>
 /// It is part of the [`Entry`] enum.
 pub struct VacantEntry<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     pub(in crate::collections::blazemap)
     key: K,
@@ -60,7 +60,7 @@ enum VacantEntryInner<'a, V> {
 
 impl<'a, K, V> Entry<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     /// Ensures a value is in the entry by inserting the default if empty,
     /// and returns a mutable reference to the value in the entry.
@@ -107,7 +107,7 @@ impl<'a, K, V> Entry<'a, K, V>
 
 impl<'a, K, V> Entry<'a, K, V>
     where
-        K: KeyWrapper,
+        K: IdWrapper,
         V: Default
 {
     /// Ensures a value is in the entry by inserting the default value if empty,
@@ -123,7 +123,7 @@ impl<'a, K, V> Entry<'a, K, V>
 
 impl<'a, K, V> OccupiedEntry<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     /// Gets the key in the entry.
     #[inline]
@@ -193,7 +193,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V>
 
 impl<'a, K, V> VacantEntry<'a, K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     /// Gets the key that would be used when inserting a value through the [`VacantEntry`].
     #[inline]

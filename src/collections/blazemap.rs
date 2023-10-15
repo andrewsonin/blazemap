@@ -16,7 +16,7 @@ pub use crate::collections::blazemap::{
     iter::{Drain, IntoIter, IntoKeys, IntoValues, Iter, IterMut, Keys, Values, ValuesMut},
 };
 use crate::collections::blazemap::entry::VacantEntryInner;
-use crate::key_wrapper::KeyWrapper;
+use crate::id_wrapper::IdWrapper;
 
 mod entry;
 mod iter;
@@ -137,7 +137,7 @@ impl<K, V> BlazeMap<K, V>
 
 impl<K, V> BlazeMap<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     /// Creates a new instance of the [`BlazeMap`]
     /// with capacity equal to the current total number of unique `K` instances.
@@ -260,7 +260,7 @@ impl<K, V> BlazeMap<K, V>
 
 impl<K, V> IntoIterator for BlazeMap<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     type Item = (K, V);
     type IntoIter = IntoIter<K, V>;
@@ -275,7 +275,7 @@ impl<K, V> IntoIterator for BlazeMap<K, V>
 
 impl<'a, K, V> IntoIterator for &'a BlazeMap<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     type Item = (K, &'a V);
     type IntoIter = Iter<'a, K, V>;
@@ -288,7 +288,7 @@ impl<'a, K, V> IntoIterator for &'a BlazeMap<K, V>
 
 impl<'a, K, V> IntoIterator for &'a mut BlazeMap<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     type Item = (K, &'a mut V);
     type IntoIter = IterMut<'a, K, V>;
@@ -301,7 +301,7 @@ impl<'a, K, V> IntoIterator for &'a mut BlazeMap<K, V>
 
 impl<K, V> FromIterator<(K, V)> for BlazeMap<K, V>
     where
-        K: KeyWrapper
+        K: IdWrapper
 {
     #[inline]
     fn from_iter<T: IntoIterator<Item=(K, V)>>(iter: T) -> Self {
@@ -337,8 +337,8 @@ macro_rules! blaze_map_orig_key_blocking_iter {
 
 impl<K, V> Debug for BlazeMap<K, V>
     where
-        K: KeyWrapper,
-        <K as KeyWrapper>::OrigType: Debug,
+        K: IdWrapper,
+        <K as IdWrapper>::OrigType: Debug,
         V: Debug
 {
     #[inline]
@@ -351,8 +351,8 @@ impl<K, V> Debug for BlazeMap<K, V>
 #[cfg(feature = "serde")]
 impl<K, V> Serialize for BlazeMap<K, V>
     where
-        K: KeyWrapper,
-        <K as KeyWrapper>::OrigType: Serialize,
+        K: IdWrapper,
+        <K as IdWrapper>::OrigType: Serialize,
         V: Serialize
 {
     #[inline]
@@ -372,8 +372,8 @@ impl<K, V> Serialize for BlazeMap<K, V>
 #[cfg(feature = "serde")]
 impl<'de, K, V> Deserialize<'de> for BlazeMap<K, V>
     where
-        K: KeyWrapper,
-        <K as KeyWrapper>::OrigType: Deserialize<'de>,
+        K: IdWrapper,
+        <K as IdWrapper>::OrigType: Deserialize<'de>,
         V: Deserialize<'de>
 {
     #[inline]
@@ -388,13 +388,13 @@ impl<'de, K, V> Deserialize<'de> for BlazeMap<K, V>
 #[cfg(feature = "serde")]
 struct BlazeMapDeserializer<K, V>(PhantomData<(K, V)>)
     where
-        K: KeyWrapper;
+        K: IdWrapper;
 
 #[cfg(feature = "serde")]
 impl<'de, K, V> Visitor<'de> for BlazeMapDeserializer<K, V>
     where
-        K: KeyWrapper,
-        <K as KeyWrapper>::OrigType: Deserialize<'de>,
+        K: IdWrapper,
+        <K as IdWrapper>::OrigType: Deserialize<'de>,
         V: Deserialize<'de>
 {
     type Value = BlazeMap<K, V>;
