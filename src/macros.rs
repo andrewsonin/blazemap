@@ -58,9 +58,9 @@ macro_rules! register_blazemap_id {
         $(#[$attrs:meta])*
         $vis:vis
         struct $new_type:ident($orig_type:ty)
+        $(; Derive(as for Original Type): {$($to_derive_orig:ident),+ $(,)?} )?
+        $(; Derive(as for Serial Number): {$(  $to_derive_sn:ident),+ $(,)?} )?
         $(;)?
-        $(Derive(as for Original Type): {$($to_derive_orig:ident),+ $(,)?} $(;)?)?
-        $(Derive(as for Serial Number): {$(  $to_derive_sn:ident),+ $(,)?} $(;)?)?
     ) => {
         $crate::blazemap_inner! {
             $(#[$attrs])*
@@ -74,9 +74,9 @@ macro_rules! register_blazemap_id {
         $(#[$attrs:meta])*
         $vis:vis
         struct $new_type:ident($orig_type:ty)
+        $(; Derive(as for Serial Number): {$(  $to_derive_sn:ident),+ $(,)?} )?
+        $(; Derive(as for Original Type): {$($to_derive_orig:ident),+ $(,)?} )?
         $(;)?
-        $(Derive(as for Serial Number): {$(  $to_derive_sn:ident),+ $(,)?} $(;)?)?
-        $(Derive(as for Original Type): {$($to_derive_orig:ident),+ $(,)?} $(;)?)?
     ) => {
         $crate::blazemap_inner! {
             $(#[$attrs])*
