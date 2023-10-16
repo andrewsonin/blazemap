@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
+use std::mem::needs_drop;
 use std::panic::{RefUnwindSafe, UnwindSafe};
 
 use crate::collections::blazemap::BlazeMap;
@@ -481,6 +482,9 @@ impl<'a, K, V> Drop for Drain<'a, K, V>
 {
     #[inline]
     fn drop(&mut self) {
+        if !needs_drop::<V>() {
+            return;
+        }
         let iter = &mut self.inner;
         while iter.len != 0 {
             let value = unsafe { &mut *iter.inner.add(iter.current_position) };
