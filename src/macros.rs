@@ -99,7 +99,7 @@ macro_rules! blazemap_inner {
         $(#[$attrs])*
         #[derive(Clone, Copy, Eq, PartialEq, Hash)]
         #[repr(transparent)]
-        struct $new_type($crate::utils::PrivateIndex);
+        $vis struct $new_type($crate::utils::PrivateIndex);
 
         impl $new_type
         {
