@@ -3,7 +3,10 @@ use std::marker::PhantomData;
 use std::mem::needs_drop;
 use std::panic::{RefUnwindSafe, UnwindSafe};
 
+use read_write_api::ReadApi;
+
 use crate::collections::blazemap::BlazeMap;
+use crate::orig_type_id_map::OrigTypeIdMap;
 use crate::prelude::IdWrapper;
 
 /// An iterator over the entries of a [`BlazeMap`].
@@ -550,7 +553,8 @@ impl<'a, K, V> Debug for Iter<'a, K, V>
 {
     #[inline]
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        let static_info = K::static_info().read();
+        let static_info = K::static_info();
+        let static_info = static_info.read();
         let iter = self.map(
             |(key, value)| {
                 let key = unsafe { static_info.get_key_unchecked(key.get_index()) };
@@ -612,7 +616,8 @@ impl<'a, K, V> Debug for Keys<'a, K, V>
 {
     #[inline]
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        let static_info = K::static_info().read();
+        let static_info = K::static_info();
+        let static_info = static_info.read();
         let iter = self.map(
             |key| unsafe { static_info.get_key_unchecked(key.get_index()) }
         );

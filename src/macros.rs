@@ -112,6 +112,8 @@ macro_rules! blazemap_inner {
         impl $crate::prelude::IdWrapper for $new_type
         {
             type OrigType = $orig_type;
+            type OrigTypeIdMap = $crate::utils::StaticInfo<$orig_type>;
+            type OrigTypeIdMapApi = &'static $crate::external::parking_lot::RwLock<&'static mut $crate::utils::StaticInfo<$orig_type>>;
 
             #[inline]
             fn get_index(self) -> usize {
@@ -125,13 +127,15 @@ macro_rules! blazemap_inner {
             }
 
             #[inline]
-            fn static_info() -> &'static $crate::external::parking_lot::RwLock<$crate::utils::StaticInfo<$orig_type>>
+            fn static_info() -> &'static $crate::external::parking_lot::RwLock<&'static mut $crate::utils::StaticInfo<$orig_type>>
             {
                 use $crate::external::once_cell::sync::Lazy;
                 use $crate::external::parking_lot::RwLock;
                 use $crate::utils::StaticInfo;
-                static MAP: Lazy<RwLock<StaticInfo<$orig_type>>> = Lazy::new(
-                    || RwLock::new(StaticInfo::new())
+
+                static mut STATIC_INFO: StaticInfo<$orig_type> = StaticInfo::new();
+                static MAP: Lazy<RwLock<&'static mut StaticInfo<$orig_type>>> = Lazy::new(
+                    || RwLock::new(unsafe { &mut STATIC_INFO })
                 );
                 &MAP
             }
@@ -155,7 +159,10 @@ macro_rules! blazemap_derive_key_inner {
         impl PartialOrd for $new_type
         {
             #[inline]
-            fn partial_cmp(&self, other: &Self) -> Option<::std::cmp::Ordering> {
+            fn partial_cmp(&self, other: &Self) -> Option<::std::cmp::Ordering>
+            {
+                use $crate::orig_type_id_map::OrigTypeIdMap;
+
                 let Self(lhs) = self;
                 let Self(rhs) = other;
                 let guard = <Self as $crate::prelude::IdWrapper>::static_info().read();
@@ -181,7 +188,10 @@ macro_rules! blazemap_derive_key_inner {
         impl Ord for $new_type
         {
             #[inline]
-            fn cmp(&self, other: &Self) -> ::std::cmp::Ordering {
+            fn cmp(&self, other: &Self) -> ::std::cmp::Ordering
+            {
+                use $crate::orig_type_id_map::OrigTypeIdMap;
+
                 let Self(lhs) = self;
                 let Self(rhs) = other;
                 let guard = <Self as $crate::prelude::IdWrapper>::static_info().read();
@@ -201,6 +211,8 @@ macro_rules! blazemap_derive_key_inner {
             #[inline]
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result
             {
+                use $crate::orig_type_id_map::OrigTypeIdMap;
+
                 let Self(index) = self;
                 let mut f = f.debug_struct(::std::stringify!($new_type));
                 let guard = <Self as $crate::prelude::IdWrapper>::static_info().read();
@@ -219,6 +231,8 @@ macro_rules! blazemap_derive_key_inner {
             #[inline]
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result
             {
+                use $crate::orig_type_id_map::OrigTypeIdMap;
+
                 let Self(index) = self;
                 let guard = <Self as $crate::prelude::IdWrapper>::static_info().read();
                 let original_key = unsafe { guard.get_key_unchecked(index.into_inner()) };
@@ -248,6 +262,8 @@ macro_rules! blazemap_derive_key_inner {
                 where
                     S: $crate::external::serde::Serializer
             {
+                use $crate::orig_type_id_map::OrigTypeIdMap;
+
                 let Self(index) = self;
                 unsafe {
                     <Self as $crate::prelude::IdWrapper>::static_info()

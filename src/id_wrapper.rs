@@ -1,8 +1,8 @@
 use std::hash::Hash;
 
-use parking_lot::{RwLock, RwLockUpgradableReadGuard};
+use read_write_api::{RwApi, UpgradableReadApi, UpgradableReadGuard};
 
-use crate::utils::StaticInfo;
+use crate::orig_type_id_map::OrigTypeIdMap;
 
 /// Provides interface for `blazemap` key-wrapper types
 /// defined by the [`register_blazemap_id`](crate::register_blazemap_id) macro.
@@ -11,15 +11,22 @@ pub trait IdWrapper: Copy
     /// Original key type.
     type OrigType: 'static + Clone + Eq + Hash;
 
+    #[doc(hidden)]
+    type OrigTypeIdMap: 'static + OrigTypeIdMap<Self::OrigType>;
+
+    #[doc(hidden)]
+    type OrigTypeIdMapApi: RwApi<Target=&'static mut Self::OrigTypeIdMap>;
+
     /// Creates a new instance of [`Self`] based on the [`Self::OrigType`] instance.
     #[inline]
     fn new(key: Self::OrigType) -> Self {
         unsafe {
-            let guard = Self::static_info().upgradable_read();
+            let mut static_info = Self::static_info();
+            let guard = static_info.upgradable_read();
             if let Some(index) = guard.get_index(&key) {
                 Self::from_index_unchecked(index)
             } else {
-                let mut guard = RwLockUpgradableReadGuard::upgrade(guard);
+                let mut guard = guard.upgrade();
                 let index = guard.insert_new_key_unchecked(key);
                 Self::from_index_unchecked(index)
             }
@@ -33,5 +40,5 @@ pub trait IdWrapper: Copy
     unsafe fn from_index_unchecked(index: usize) -> Self;
 
     #[doc(hidden)]
-    fn static_info() -> &'static RwLock<StaticInfo<Self::OrigType>>;
+    fn static_info() -> Self::OrigTypeIdMapApi;
 }

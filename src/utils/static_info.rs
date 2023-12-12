@@ -3,6 +3,8 @@ use std::hash::Hash;
 
 use once_cell::sync::Lazy;
 
+use crate::orig_type_id_map::OrigTypeIdMap;
+
 /// Global, statically initialized structure that contains correspondence mapping
 /// between blazemap index wrappers and original keys.
 #[doc(hidden)]
@@ -24,31 +26,27 @@ impl<K> StaticInfo<K>
     }
 }
 
-impl<K> StaticInfo<K>
+impl<K> OrigTypeIdMap<K> for StaticInfo<K>
     where
         K: Clone + Eq + Hash
 {
     #[inline(always)]
-    pub(in crate)
     fn num_elems(&self) -> usize {
         self.index_to_orig.len()
     }
 
     #[inline]
-    pub(in crate)
     fn get_index(&self, key: &K) -> Option<usize> {
         self.orig_to_index.get(key).copied()
     }
 
     #[inline]
-    pub
     unsafe
     fn get_key_unchecked(&self, index: usize) -> &K {
         self.index_to_orig.get_unchecked(index)
     }
 
     #[inline]
-    pub(in crate)
     unsafe
     fn insert_new_key_unchecked(&mut self, key: K) -> usize
     {

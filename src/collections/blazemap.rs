@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 
+use read_write_api::ReadApi;
 #[cfg(feature = "serde")]
 use serde::{
     de::{MapAccess, Visitor},
@@ -17,6 +18,7 @@ pub use crate::collections::blazemap::{
 };
 use crate::collections::blazemap::entry::VacantEntryInner;
 use crate::id_wrapper::IdWrapper;
+use crate::orig_type_id_map::OrigTypeIdMap;
 
 mod entry;
 mod iter;
@@ -322,7 +324,8 @@ impl<K, V> Default for BlazeMap<K, V>
 
 macro_rules! blaze_map_orig_key_blocking_iter {
     ($self:ident, $iter:ident, $guard:ident) => {
-        let $guard = K::static_info().read();
+        let $guard = K::static_info();
+        let $guard = $guard.read();
         let $iter = $self.inner.iter()
             .enumerate()
             .filter_map(|(idx, value)| Some((idx, value.as_ref()?)))

@@ -1,6 +1,6 @@
 [package]
 name = "blazemap"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["Andrew Sonin <sonin.cel@yandex.ru>"]
 categories = ["data-structures"]
 description = """
@@ -16,6 +16,7 @@ edition = "2021"
 [dependencies]
 once_cell = "1"
 parking_lot = "0.12"
+read-write-api = "0.17"
 serde = { version = "1", optional = true, features = ["derive"] }
 
 [dev-dependencies]

@@ -9,6 +9,8 @@ pub mod utils;
 /// Collection types.
 pub mod collections;
 mod macros;
+#[doc(hidden)]
+pub mod orig_type_id_map;
 
 /// Crate prelude.
 pub mod prelude {
