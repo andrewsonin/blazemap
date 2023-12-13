@@ -6,7 +6,8 @@ slab-like map with an interface similar to that of `HashMap`._
 Let's imagine that at runtime you create a small number of clumsy objects that are used as keys in hashmaps.
 
 This crate allows you to seamlessly replace them with lightweight identifiers in a slab-like manner
-using the `register_blazemap_id` macro as well as using them as keys in the `BlazeMap`
+using the `register_blazemap_id` and `register_blazemap_id_wrapper` macros as well as using them as keys in
+the `BlazeMap`
 — a vector-based slab-like map with an interface similar to that of `HashMap`.
 
 ## Graphical representation of the old approach
@@ -17,7 +18,9 @@ using the `register_blazemap_id` macro as well as using them as keys in the `Bla
 
 ![NewApproach.svg](./docs/drawio/README_-_NewApproach.svg)
 
-## `register_blazemap_id` macro
+## `register_blazemap_id_wrapper` macro
+
+Creates a new type that is compatible as a key-wrapper for `blazemap` collections.
 
 This macro supports optional inference of standard traits using the following syntax:
 
@@ -44,12 +47,30 @@ This macro supports optional inference of standard traits using the following sy
     * `PartialOrd` (mutually exclusive with `Ord`)
     * `Ord` (also derives `PartialOrd`, so mutually exclusive with `PartialOrd`)
 
-### Example
+## `register_blazemap_id` macro
+
+Creates a new type based on `usize` that is compatible as a key-wrapper for `blazemap` collections.
+
+This macro supports optional inference of standard traits using the following syntax:
+
+* `Derive` — derives traits in the same way as for
+  the serial number assigned when creating a new instance of the type.
+  Because methods inferred by this option do not require additional
+  locking on synchronization primitives,
+  they do not incur any additional overhead compared to methods inferred for plain `usize`.
+  This method supports inference of the following traits:
+    * `PartialOrd` (mutually exclusive with `Ord`)
+    * `Ord` (also derives `PartialOrd`, so mutually exclusive with `PartialOrd`)
+    * `Serialize` (with `serde` feature only)
+
+## Examples
+
+### `register_blazemap_id_wrapper` macro
 
 ```rust
-use blazemap::prelude::{BlazeMap, register_blazemap_id};
+use blazemap::prelude::{BlazeMap, register_blazemap_id_wrapper};
 
-register_blazemap_id! {
+register_blazemap_id_wrapper! {
     pub struct BlazeMapId(String);
     Derive(as for Original Type): {  // Optional section
         Debug,
@@ -70,4 +91,28 @@ map.insert(key_1, "1");
 map.insert(key_3, "3");
 
 assert_eq!(format!("{map:?}"), r#"{"first": "1", "second": "2", "third": "3"}"#)
+```
+
+### `register_blazemap_id` macro
+
+```rust
+use blazemap::prelude::{BlazeMap, register_blazemap_id};
+
+register_blazemap_id! {
+    pub struct BlazeMapIdExample(start from: 1);  // "(start from: number)" is optional
+    Derive: {                                     // Derive section is also optional
+        Ord
+    };
+}
+
+let key_1 = BlazeMapIdExample::new();
+let key_2 = BlazeMapIdExample::new();
+let key_3 = BlazeMapIdExample::new();
+
+let mut map = BlazeMap::new();
+map.insert(key_2, "2");
+map.insert(key_1, "1");
+map.insert(key_3, "3");
+
+assert_eq!(format!("{map:?}"), r#"{1: "1", 2: "2", 3: "3"}"#)
 ```

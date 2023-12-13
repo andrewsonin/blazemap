@@ -1,15 +1,24 @@
+use std::borrow::Borrow;
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 
 use read_write_api::ReadApi;
+
 #[cfg(feature = "serde")]
-use serde::{
-    de::{MapAccess, Visitor},
-    Deserialize,
-    Deserializer,
-    ser::SerializeMap,
-    Serialize,
-    Serializer,
+use {
+    crate::{
+        external::read_write_api::UpgradableReadApi,
+        orig_type_id_map::InsertableStaticInfoApi,
+        prelude::BlazeMapIdWrapper,
+    },
+    serde::{
+        de::{MapAccess, Visitor},
+        Deserialize,
+        Deserializer,
+        ser::SerializeMap,
+        Serialize,
+        Serializer,
+    },
 };
 
 pub use crate::collections::blazemap::{
@@ -17,8 +26,8 @@ pub use crate::collections::blazemap::{
     iter::{Drain, IntoIter, IntoKeys, IntoValues, Iter, IterMut, Keys, Values, ValuesMut},
 };
 use crate::collections::blazemap::entry::VacantEntryInner;
-use crate::id_wrapper::IdWrapper;
-use crate::orig_type_id_map::OrigTypeIdMap;
+use crate::id_wrapper::BlazeMapId;
+use crate::orig_type_id_map::StaticInfoApi;
 
 mod entry;
 mod iter;
@@ -139,7 +148,7 @@ impl<K, V> BlazeMap<K, V>
 
 impl<K, V> BlazeMap<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     /// Creates a new instance of the [`BlazeMap`]
     /// with capacity equal to the current total number of unique `K` instances.
@@ -262,7 +271,7 @@ impl<K, V> BlazeMap<K, V>
 
 impl<K, V> IntoIterator for BlazeMap<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     type Item = (K, V);
     type IntoIter = IntoIter<K, V>;
@@ -277,7 +286,7 @@ impl<K, V> IntoIterator for BlazeMap<K, V>
 
 impl<'a, K, V> IntoIterator for &'a BlazeMap<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     type Item = (K, &'a V);
     type IntoIter = Iter<'a, K, V>;
@@ -290,7 +299,7 @@ impl<'a, K, V> IntoIterator for &'a BlazeMap<K, V>
 
 impl<'a, K, V> IntoIterator for &'a mut BlazeMap<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     type Item = (K, &'a mut V);
     type IntoIter = IterMut<'a, K, V>;
@@ -303,7 +312,7 @@ impl<'a, K, V> IntoIterator for &'a mut BlazeMap<K, V>
 
 impl<K, V> FromIterator<(K, V)> for BlazeMap<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     #[inline]
     fn from_iter<T: IntoIterator<Item=(K, V)>>(iter: T) -> Self {
@@ -340,22 +349,26 @@ macro_rules! blaze_map_orig_key_blocking_iter {
 
 impl<K, V> Debug for BlazeMap<K, V>
     where
-        K: IdWrapper,
-        <K as IdWrapper>::OrigType: Debug,
+        K: BlazeMapId,
+        <K as BlazeMapId>::OrigType: Debug,
         V: Debug
 {
     #[inline]
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         blaze_map_orig_key_blocking_iter!(self, iter, guard);
-        f.debug_map().entries(iter).finish()
+        let mut debug_map = f.debug_map();
+        for (key, value) in iter {
+            debug_map.entry(key.borrow(), value);
+        }
+        debug_map.finish()
     }
 }
 
 #[cfg(feature = "serde")]
 impl<K, V> Serialize for BlazeMap<K, V>
     where
-        K: IdWrapper,
-        <K as IdWrapper>::OrigType: Serialize,
+        K: BlazeMapId,
+        <K as BlazeMapId>::OrigType: Serialize,
         V: Serialize
 {
     #[inline]
@@ -366,7 +379,7 @@ impl<K, V> Serialize for BlazeMap<K, V>
         blaze_map_orig_key_blocking_iter!(self, iter, guard);
         let mut serializer = serializer.serialize_map(Some(self.len))?;
         for (key, value) in iter {
-            serializer.serialize_entry(key, value)?;
+            serializer.serialize_entry(key.borrow(), value)?;
         }
         serializer.end()
     }
@@ -375,8 +388,10 @@ impl<K, V> Serialize for BlazeMap<K, V>
 #[cfg(feature = "serde")]
 impl<'de, K, V> Deserialize<'de> for BlazeMap<K, V>
     where
-        K: IdWrapper,
-        <K as IdWrapper>::OrigType: Deserialize<'de>,
+        K: BlazeMapIdWrapper,
+        <K as BlazeMapId>::OrigType: Deserialize<'de>,
+        <K as BlazeMapId>::StaticInfoApi: InsertableStaticInfoApi<<K as BlazeMapId>::OrigType>,
+        <K as BlazeMapId>::StaticInfoApiLock: UpgradableReadApi,
         V: Deserialize<'de>
 {
     #[inline]
@@ -391,13 +406,17 @@ impl<'de, K, V> Deserialize<'de> for BlazeMap<K, V>
 #[cfg(feature = "serde")]
 struct BlazeMapDeserializer<K, V>(PhantomData<(K, V)>)
     where
-        K: IdWrapper;
+        K: BlazeMapIdWrapper,
+        <K as BlazeMapId>::StaticInfoApi: InsertableStaticInfoApi<<K as BlazeMapId>::OrigType>,
+        <K as BlazeMapId>::StaticInfoApiLock: UpgradableReadApi;
 
 #[cfg(feature = "serde")]
 impl<'de, K, V> Visitor<'de> for BlazeMapDeserializer<K, V>
     where
-        K: IdWrapper,
-        <K as IdWrapper>::OrigType: Deserialize<'de>,
+        K: BlazeMapIdWrapper,
+        <K as BlazeMapId>::OrigType: Deserialize<'de>,
+        <K as BlazeMapId>::StaticInfoApi: InsertableStaticInfoApi<<K as BlazeMapId>::OrigType>,
+        <K as BlazeMapId>::StaticInfoApiLock: UpgradableReadApi,
         V: Deserialize<'de>
 {
     type Value = BlazeMap<K, V>;

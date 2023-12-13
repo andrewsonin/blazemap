@@ -1,23 +1,40 @@
 use std::hash::Hash;
 
-use read_write_api::{RwApi, UpgradableReadApi, UpgradableReadGuard};
+use read_write_api::{ReadApi, UpgradableReadApi, UpgradableReadGuard};
 
-use crate::orig_type_id_map::OrigTypeIdMap;
+use crate::orig_type_id_map::{InsertableStaticInfoApi, StaticInfoApi};
 
-/// Provides interface for `blazemap` key-wrapper types
-/// defined by the [`register_blazemap_id`](crate::register_blazemap_id) macro.
-pub trait IdWrapper: Copy
+/// Provides interface for `blazemap` id types
+/// defined by the [`register_blazemap_id_wrapper`](crate::register_blazemap_id_wrapper) macro.
+pub trait BlazeMapId: Copy
 {
     /// Original key type.
     type OrigType: 'static + Clone + Eq + Hash;
 
     #[doc(hidden)]
-    type OrigTypeIdMap: 'static + OrigTypeIdMap<Self::OrigType>;
+    type StaticInfoApi: 'static + StaticInfoApi<Self::OrigType>;
 
     #[doc(hidden)]
-    type OrigTypeIdMapApi: RwApi<Target=&'static mut Self::OrigTypeIdMap>;
+    type StaticInfoApiLock: ReadApi<Target=Self::StaticInfoApi>;
 
-    /// Creates a new instance of [`Self`] based on the [`Self::OrigType`] instance.
+    #[doc(hidden)]
+    fn get_index(self) -> usize;
+
+    #[doc(hidden)]
+    unsafe fn from_index_unchecked(index: usize) -> Self;
+
+    #[doc(hidden)]
+    fn static_info() -> Self::StaticInfoApiLock;
+}
+
+/// Provides interface for constructable `blazemap` key-wrapper types
+/// defined by the [`register_blazemap_id`](crate::register_blazemap_id_wrapper) macro.
+pub trait BlazeMapIdWrapper: BlazeMapId
+    where
+        Self::StaticInfoApi: InsertableStaticInfoApi<Self::OrigType>,
+        Self::StaticInfoApiLock: UpgradableReadApi
+{
+    /// Creates a new instance of [`Self`] based on the [`Self::OrigType`](BlazeMapId::OrigType) instance.
     #[inline]
     fn new(key: Self::OrigType) -> Self {
         unsafe {
@@ -32,13 +49,4 @@ pub trait IdWrapper: Copy
             }
         }
     }
-
-    #[doc(hidden)]
-    fn get_index(self) -> usize;
-
-    #[doc(hidden)]
-    unsafe fn from_index_unchecked(index: usize) -> Self;
-
-    #[doc(hidden)]
-    fn static_info() -> Self::OrigTypeIdMapApi;
 }

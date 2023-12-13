@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 use std::mem::needs_drop;
@@ -6,8 +7,8 @@ use std::panic::{RefUnwindSafe, UnwindSafe};
 use read_write_api::ReadApi;
 
 use crate::collections::blazemap::BlazeMap;
-use crate::orig_type_id_map::OrigTypeIdMap;
-use crate::prelude::IdWrapper;
+use crate::orig_type_id_map::StaticInfoApi;
+use crate::prelude::BlazeMapId;
 
 /// An iterator over the entries of a [`BlazeMap`].
 ///
@@ -137,7 +138,7 @@ pub struct Drain<'a, K, V>
 
 impl<'a, K, V> Iterator for Iter<'a, K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     type Item = (K, &'a V);
 
@@ -173,7 +174,7 @@ impl<'a, K, V> Iterator for Iter<'a, K, V>
 
 impl<'a, K, V> ExactSizeIterator for Iter<'a, K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     #[inline]
     fn len(&self) -> usize {
@@ -183,7 +184,7 @@ impl<'a, K, V> ExactSizeIterator for Iter<'a, K, V>
 
 impl<'a, K, V> Iterator for IterMut<'a, K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     type Item = (K, &'a mut V);
 
@@ -213,7 +214,7 @@ impl<'a, K, V> Iterator for IterMut<'a, K, V>
 
 impl<'a, K, V> ExactSizeIterator for IterMut<'a, K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     #[inline]
     fn len(&self) -> usize {
@@ -223,7 +224,7 @@ impl<'a, K, V> ExactSizeIterator for IterMut<'a, K, V>
 
 impl<'a, K, V> Iterator for Keys<'a, K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     type Item = K;
 
@@ -259,7 +260,7 @@ impl<'a, K, V> Iterator for Keys<'a, K, V>
 
 impl<'a, K, V> ExactSizeIterator for Keys<'a, K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     #[inline]
     fn len(&self) -> usize {
@@ -342,7 +343,7 @@ impl<'a, K, V> ExactSizeIterator for ValuesMut<'a, K, V>
 
 impl<K, V> Iterator for IntoIter<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     type Item = (K, V);
 
@@ -366,7 +367,7 @@ impl<K, V> Iterator for IntoIter<K, V>
 
 impl<K, V> ExactSizeIterator for IntoIter<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     #[inline]
     fn len(&self) -> usize {
@@ -376,7 +377,7 @@ impl<K, V> ExactSizeIterator for IntoIter<K, V>
 
 impl<K, V> Iterator for IntoKeys<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     type Item = K;
 
@@ -400,7 +401,7 @@ impl<K, V> Iterator for IntoKeys<K, V>
 
 impl<K, V> ExactSizeIterator for IntoKeys<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     #[inline]
     fn len(&self) -> usize {
@@ -431,7 +432,7 @@ impl<K, V> Iterator for IntoValues<K, V>
 
 impl<K, V> ExactSizeIterator for IntoValues<K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     #[inline]
     fn len(&self) -> usize {
@@ -441,7 +442,7 @@ impl<K, V> ExactSizeIterator for IntoValues<K, V>
 
 impl<'a, K, V> Iterator for Drain<'a, K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     type Item = (K, V);
 
@@ -473,7 +474,7 @@ impl<'a, K, V> Iterator for Drain<'a, K, V>
 
 impl<'a, K, V> ExactSizeIterator for Drain<'a, K, V>
     where
-        K: IdWrapper
+        K: BlazeMapId
 {
     #[inline]
     fn len(&self) -> usize {
@@ -547,7 +548,7 @@ impl<'a, K, V> Copy for Iter<'a, K, V> {}
 
 impl<'a, K, V> Debug for Iter<'a, K, V>
     where
-        K: IdWrapper,
+        K: BlazeMapId,
         K::OrigType: Debug,
         V: Debug
 {
@@ -555,19 +556,18 @@ impl<'a, K, V> Debug for Iter<'a, K, V>
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         let static_info = K::static_info();
         let static_info = static_info.read();
-        let iter = self.map(
-            |(key, value)| {
-                let key = unsafe { static_info.get_key_unchecked(key.get_index()) };
-                (key, value)
-            }
-        );
-        f.debug_map().entries(iter).finish()
+        let mut debug_map = f.debug_map();
+        for (key, value) in self.into_iter() {
+            let key = unsafe { static_info.get_key_unchecked(key.get_index()) };
+            debug_map.entry(key.borrow(), value);
+        }
+        debug_map.finish()
     }
 }
 
 impl<'a, K, V> Debug for IterMut<'a, K, V>
     where
-        K: IdWrapper,
+        K: BlazeMapId,
         K::OrigType: Debug,
         V: Debug
 {
@@ -611,17 +611,19 @@ impl<'a, K, V> Copy for Values<'a, K, V> {}
 
 impl<'a, K, V> Debug for Keys<'a, K, V>
     where
-        K: IdWrapper,
+        K: BlazeMapId,
         K::OrigType: Debug
 {
     #[inline]
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         let static_info = K::static_info();
         let static_info = static_info.read();
-        let iter = self.map(
-            |key| unsafe { static_info.get_key_unchecked(key.get_index()) }
-        );
-        f.debug_list().entries(iter).finish()
+        let mut debug_list = f.debug_list();
+        for key in self.into_iter() {
+            let key = unsafe { static_info.get_key_unchecked(key.get_index()) };
+            debug_list.entry(key.borrow());
+        }
+        debug_list.finish()
     }
 }
 
@@ -661,7 +663,7 @@ impl<'a, K, V> Debug for ValuesMut<'a, K, V>
 
 impl<K, V> Debug for IntoIter<K, V>
     where
-        K: IdWrapper,
+        K: BlazeMapId,
         K::OrigType: Debug,
         V: Debug
 {
@@ -673,7 +675,7 @@ impl<K, V> Debug for IntoIter<K, V>
 
 impl<K, V> Debug for IntoKeys<K, V>
     where
-        K: IdWrapper,
+        K: BlazeMapId,
         K::OrigType: Debug
 {
     #[inline]
@@ -694,7 +696,7 @@ impl<K, V> Debug for IntoValues<K, V>
 
 impl<'a, K, V> Debug for Drain<'a, K, V>
     where
-        K: IdWrapper,
+        K: BlazeMapId,
         K::OrigType: Debug,
         V: Debug
 {

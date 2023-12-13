@@ -1,4 +1,4 @@
-pub use {private_index::PrivateIndex, static_info::StaticInfo};
+pub use {private_index::PrivateIndex, static_info::{IdWrapperStaticInfo, TrivialIdStaticInfo}};
 
 #[doc(hidden)]
 mod private_index;
