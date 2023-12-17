@@ -1,5 +1,5 @@
-/// Creates a new type that is compatible as a key-wrapper for `blazemap` collections.
-/// Use this macro if you want to wrap your clumsy types in `blazemap` collection keys.
+/// Creates a new type that acts as an `usize`-based replacement for the old type
+/// that can be used as a key for `blazemap` collections.
 ///
 /// This macro supports optional inference of standard traits using the following syntax:
 ///
@@ -32,7 +32,7 @@
 /// use blazemap::prelude::{BlazeMap, register_blazemap_id_wrapper};
 ///
 /// register_blazemap_id_wrapper! {
-///     pub struct BlazeMapKeyExample(&'static str);
+///     pub struct Key(&'static str);
 ///     Derive(as for Original Type): {  // Optional section
 ///         Debug,
 ///         Display,
@@ -42,9 +42,9 @@
 ///     }
 /// }
 ///
-/// let key_1 = BlazeMapKeyExample::new("first");
-/// let key_2 = BlazeMapKeyExample::new("second");
-/// let key_3 = BlazeMapKeyExample::new("third");
+/// let key_1 = Key::new("first");
+/// let key_2 = Key::new("second");
+/// let key_3 = Key::new("third");
 ///
 /// let mut map = BlazeMap::new();
 /// map.insert(key_2, "2");
@@ -89,7 +89,8 @@ macro_rules! register_blazemap_id_wrapper {
     }
 }
 
-/// Creates a new type based on `usize` that is compatible as a key-wrapper for `blazemap` collections.
+/// Creates a new type based on incrementally generated `usize` instances
+/// that can be used as a key for `blazemap` collections.
 ///
 /// This macro supports optional inference of standard traits using the following syntax:
 ///
@@ -109,15 +110,15 @@ macro_rules! register_blazemap_id_wrapper {
 /// use blazemap::prelude::{BlazeMap, register_blazemap_id};
 ///
 /// register_blazemap_id! {
-///     pub struct BlazeMapIdExample(start from: 1);  // "(start from: number)" is optional
-///     Derive: {                                     // Derive section is also optional
+///     pub struct Id(start from: 1);  // "(start from: number)" is optional
+///     Derive: {                      // Derive section is also optional
 ///         Ord
 ///     };
 /// }
 ///
-/// let key_1 = BlazeMapIdExample::new();
-/// let key_2 = BlazeMapIdExample::new();
-/// let key_3 = BlazeMapIdExample::new();
+/// let key_1 = Id::new();
+/// let key_2 = Id::new();
+/// let key_3 = Id::new();
 ///
 /// let mut map = BlazeMap::new();
 /// map.insert(key_2, "2");
