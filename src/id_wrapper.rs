@@ -5,7 +5,8 @@ use read_write_api::{ReadApi, UpgradableReadApi, UpgradableReadGuard};
 use crate::orig_type_id_map::{InsertableStaticInfoApi, StaticInfoApi};
 
 /// Provides interface for `blazemap` id types
-/// defined by the [`register_blazemap_id_wrapper`](crate::register_blazemap_id_wrapper) macro.
+/// defined by the [`register_blazemap_id_wrapper`](crate::register_blazemap_id_wrapper)
+/// and [`register_blazemap_id`](crate::register_blazemap_id) macros.
 pub trait BlazeMapId: Copy
 {
     /// Original key type.
@@ -28,7 +29,7 @@ pub trait BlazeMapId: Copy
 }
 
 /// Provides interface for constructable `blazemap` key-wrapper types
-/// defined by the [`register_blazemap_id`](crate::register_blazemap_id_wrapper) macro.
+/// defined by the [`register_blazemap_id_wrapper`](crate::register_blazemap_id_wrapper) macro.
 pub trait BlazeMapIdWrapper: BlazeMapId
     where
         Self::StaticInfoApi: InsertableStaticInfoApi<Self::OrigType>,
