@@ -16,7 +16,7 @@ pub mod orig_type_id_map;
 pub mod prelude {
     pub use crate::{
         collections::blazemap::BlazeMap,
-        id_wrapper::{BlazeMapId, BlazeMapIdWrapper},
+        id_wrapper::{AllInstancesIter, BlazeMapId, BlazeMapIdWrapper},
         register_blazemap_id,
         register_blazemap_id_wrapper,
     };

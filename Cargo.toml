@@ -1,6 +1,6 @@
 [package]
 name = "blazemap"
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Andrew Sonin <sonin.cel@yandex.ru>"]
 categories = ["data-structures"]
 description = """
