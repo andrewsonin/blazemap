@@ -1,4 +1,4 @@
-#![cfg(feature = "serde")]
+#![cfg(all(not(loom), feature = "serde"))]
 
 use std::io::Write;
 

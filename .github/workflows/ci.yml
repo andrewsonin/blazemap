@@ -98,4 +98,4 @@ jobs:
           cargo install cargo-binstall
           cargo binstall cargo-nextest --no-confirm --secure
       - name: Run tests with Miri
-        run: cargo miri nextest run --features serde --no-capture
+        run: cargo miri nextest run --features serde --test-threads 4
