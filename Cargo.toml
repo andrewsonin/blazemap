@@ -36,4 +36,5 @@ serde_json = "1"
 static_assertions = "1"
 
 [features]
+miri_action_log = []
 serde = ["dep:serde"]

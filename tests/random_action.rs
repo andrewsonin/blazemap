@@ -59,10 +59,11 @@ macro_rules! process_iter_action {
         }
         while $iterator.len() != 0 {
             let event = IterPeekWeights::new(&(), $rng).generate($rng);
-            #[cfg(miri)]
-            writeln!(std::io::stdout(), "{} {event:?}", $log_suffix).unwrap();
-            #[cfg(miri)]
-            std::io::stdout().flush().unwrap();
+            #[cfg(all(miri, feature = "miri_action_log"))]
+            {
+                writeln!(std::io::stdout(), "{} {:?}", $log_suffix, $event).unwrap();
+                std::io::stdout().flush().unwrap();
+            };
             match event {
                 Iter::Next => {
                     if let Some(v) = $iterator.next() {
@@ -102,10 +103,11 @@ macro_rules! process_iter_mut_action {
         }
         while $iterator.len() != 0 {
             let event = IterMutPeekWeights::new(&(), $rng).generate($rng);
-            #[cfg(miri)]
-            writeln!(std::io::stdout(), "{} {event:?}", $log_suffix).unwrap();
-            #[cfg(miri)]
-            std::io::stdout().flush().unwrap();
+            #[cfg(all(miri, target = "miri_action_log"))]
+            {
+                writeln!(std::io::stdout(), "{} {:?}", $log_suffix, $event).unwrap();
+                std::io::stdout().flush().unwrap();
+            };
             match event {
                 IterMut::Next => {
                     if let Some(v) = $iterator.next() {
@@ -138,10 +140,11 @@ impl Action<String, String> {
         I: BlazeMapId<OrigType = String> + BlazeMapIdStatic + Debug,
     {
         use std::io::Write;
-        #[cfg(miri)]
-        writeln!(std::io::stdout(), "{log_suffix} {self:?}").unwrap();
-        #[cfg(miri)]
-        std::io::stdout().flush().unwrap();
+        #[cfg(all(miri, feature = "miri_action_log"))]
+        {
+            writeln!(std::io::stdout(), "{log_suffix} {self:?}").unwrap();
+            std::io::stdout().flush().unwrap();
+        };
         match self {
             Action::Clear => map.clear(),
             Action::ShrinkToFit => map.shrink_to_fit(),

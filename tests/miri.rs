@@ -10,9 +10,9 @@ use rand::{random, Rng, SeedableRng};
 use blazemap::prelude::BlazeMap;
 use blazemap::{define_key_wrapper, define_key_wrapper_bounded};
 
-use crate::action::{ActionPeekWeights, EventWeights};
+use crate::random_action::{ActionPeekWeights, EventWeights};
 
-mod action;
+mod random_action;
 
 #[test]
 fn key_wrapper() {
