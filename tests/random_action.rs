@@ -63,7 +63,7 @@ macro_rules! process_iter_action {
             let event = IterPeekWeights::new(&(), $rng).generate($rng);
             #[cfg(all(miri, feature = "miri_action_log"))]
             {
-                writeln!(std::io::stdout(), "{} {:?}", $log_suffix, $event).unwrap();
+                println!("{} {:?}", $log_suffix, $event);
                 std::io::stdout().flush().unwrap();
             };
             match event {
@@ -107,7 +107,7 @@ macro_rules! process_iter_mut_action {
             let event = IterMutPeekWeights::new(&(), $rng).generate($rng);
             #[cfg(all(miri, target = "miri_action_log"))]
             {
-                writeln!(std::io::stdout(), "{} {:?}", $log_suffix, $event).unwrap();
+                println!("{} {:?}", $log_suffix, $event);
                 std::io::stdout().flush().unwrap();
             };
             match event {
@@ -144,7 +144,7 @@ impl Action<String, String> {
         use std::io::Write;
         #[cfg(all(miri, feature = "miri_action_log"))]
         {
-            writeln!(std::io::stdout(), "{log_suffix} {self:?}").unwrap();
+            println!("{log_suffix} {self:?}");
             std::io::stdout().flush().unwrap();
         };
         match self {
