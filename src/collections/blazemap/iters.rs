@@ -1,11 +1,15 @@
-use std::borrow::Borrow;
-use std::fmt::{Debug, Formatter};
-use std::marker::PhantomData;
-use std::panic::{RefUnwindSafe, UnwindSafe};
+use std::{
+    borrow::Borrow,
+    fmt::{Debug, Formatter},
+    marker::PhantomData,
+    panic::{RefUnwindSafe, UnwindSafe},
+};
 
-use crate::collections::blazemap::BlazeMap;
-use crate::prelude::{BlazeMapId, BlazeMapIdStatic};
-use crate::traits::{KeyByOffsetProvider, TypeInfoContainer};
+use crate::{
+    collections::blazemap::BlazeMap,
+    prelude::{BlazeMapId, BlazeMapIdStatic},
+    traits::{KeyByOffsetProvider, TypeInfoContainer},
+};
 
 /// An iterator over the entries of a [`BlazeMap`].
 ///
@@ -61,8 +65,8 @@ pub struct Values<'a, K, V> {
 
 /// A mutable iterator over the values of a [`BlazeMap`].
 ///
-/// This `struct` is created by the [`values_mut`] method on [`BlazeMap`]. See its
-/// documentation for more.
+/// This `struct` is created by the [`values_mut`] method on [`BlazeMap`]. See
+/// its documentation for more.
 ///
 /// [`values_mut`]: BlazeMap::values_mut
 pub struct ValuesMut<'a, K, V> {

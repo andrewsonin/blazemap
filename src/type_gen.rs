@@ -6,13 +6,15 @@ mod plain_id;
 
 #[cfg(all(test, not(loom)))]
 mod tests {
-    use crate::prelude::BlazeMapId;
-    use crate::{define_key_wrapper, define_key_wrapper_bounded, define_plain_id};
+    use crate::{
+        define_key_wrapper, define_key_wrapper_bounded, define_plain_id, prelude::BlazeMapId,
+    };
 
     #[cfg(feature = "serde")]
     mod serde_compatible {
-        use crate::traits::BlazeMapId;
-        use crate::{define_key_wrapper, define_key_wrapper_bounded, define_plain_id};
+        use crate::{
+            define_key_wrapper, define_key_wrapper_bounded, define_plain_id, traits::BlazeMapId,
+        };
 
         #[test]
         fn key_wrapper() {

@@ -1,16 +1,16 @@
-use std::hash::Hash;
-use std::num::NonZeroUsize;
+use std::{hash::Hash, num::NonZeroUsize};
 
 /// Holds and provides the `usize` offset.
 ///
-/// Necessary to protect the internal `usize`, which, in the absence of this wrapper,
-/// would be public in the module calling
+/// Necessary to protect the internal `usize`, which, in the absence of this
+/// wrapper, would be public in the module calling
 /// the [`define_key_wrapper`](crate::define_key_wrapper).
 ///
 /// Publicity of the internal `usize` may lead to:
 /// * UB if the programmer of the downstream crate would accidentally mutate it.
-/// * Incorrect auto-derives of standard traits such as `Default`, `Debug`, `Display`,
-///   `PartialOrd`, `Ord`, `serde::Serialize` and `serde::Deserialize`.
+/// * Incorrect auto-derives of standard traits such as `Default`, `Debug`,
+///   `Display`, `PartialOrd`, `Ord`, `serde::Serialize` and
+///   `serde::Deserialize`.
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
 #[doc(hidden)]
@@ -48,8 +48,10 @@ impl OffsetProvider<NonZeroUsize> {
 
 #[cfg(test)]
 mod tests {
-    use std::fmt::{Debug, Display};
-    use std::num::NonZeroUsize;
+    use std::{
+        fmt::{Debug, Display},
+        num::NonZeroUsize,
+    };
 
     #[cfg(feature = "serde")]
     use serde::{Deserialize, Serialize};

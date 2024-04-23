@@ -1,10 +1,13 @@
-use std::borrow::Borrow;
-use std::fmt::{Debug, Formatter};
-use std::hash::{Hash, Hasher};
-use std::marker::PhantomData;
-use std::ops::{Deref, Range};
+use std::{
+    borrow::Borrow,
+    fmt::{Debug, Formatter},
+    hash::{Hash, Hasher},
+    marker::PhantomData,
+    ops::{Deref, Range},
+};
 
-/// Provides an interface for `blazemap` id types defined by type-generating macros.
+/// Provides an interface for `blazemap` id types defined by type-generating
+/// macros.
 pub trait BlazeMapId: Copy {
     /// Original key type.
     type OrigType: 'static + Clone + Eq + Hash;
@@ -24,9 +27,11 @@ pub trait BlazeMapId: Copy {
 
 /// Provides an interface for `blazemap` key-wrapper id types
 /// defined by the [`define_key_wrapper`](crate::define_key_wrapper)
-/// and [`define_key_wrapper_bounded`](crate::define_key_wrapper_bounded) macros.
+/// and [`define_key_wrapper_bounded`](crate::define_key_wrapper_bounded)
+/// macros.
 pub trait BlazeMapIdWrapper: BlazeMapId {
-    /// Creates a new instance of [`Self`] based on the [`Self::OrigType`](BlazeMapId::OrigType) instance.
+    /// Creates a new instance of [`Self`] based on the
+    /// [`Self::OrigType`](BlazeMapId::OrigType) instance.
     unsafe fn new(type_info_container: &Self::TypeInfoContainer, key: Self::OrigType) -> Self;
 }
 
@@ -46,7 +51,8 @@ pub trait BlazeMapIdStatic: BlazeMapId {
     }
 
     /// Returns the static container
-    /// that holds all the necessary static information for the [`BlazeMapId`] type.
+    /// that holds all the necessary static information for the [`BlazeMapId`]
+    /// type.
     #[doc(hidden)]
     fn static_container() -> &'static Self::TypeInfoContainer;
 }
@@ -54,7 +60,8 @@ pub trait BlazeMapIdStatic: BlazeMapId {
 /// Implements an interface for [`BlazeMapId`] key-wrapper static containers.
 #[doc(hidden)]
 pub trait WrapKey<I: BlazeMapId> {
-    /// Creates an instance of [`BlazeMapId`] type that is unique to the given key.
+    /// Creates an instance of [`BlazeMapId`] type that is unique to the given
+    /// key.
     fn wrap_key(&self, key: I::OrigType) -> I;
 }
 
@@ -62,8 +69,9 @@ pub trait TypeInfoContainer: 'static {
     /// Original key type.
     type OrigType;
 
-    /// Returns the provider of the current total number of registered unique `Self` identifiers.
-    /// Note that this provider isn't sequentially consistent.
+    /// Returns the provider of the current total number of registered unique
+    /// `Self` identifiers. Note that this provider isn't sequentially
+    /// consistent.
     #[doc(hidden)]
     fn capacity_info_provider(&self) -> impl Deref<Target = impl CapacityInfoProvider>;
 
@@ -75,15 +83,17 @@ pub trait TypeInfoContainer: 'static {
     ) -> impl Deref<Target = impl KeyByOffsetProvider<Self::OrigType>>;
 }
 
-/// Provides the current total number of registered unique [`BlazeMapId`] identifiers.
-/// Note that there is no guarantee of sequential consistency.
+/// Provides the current total number of registered unique [`BlazeMapId`]
+/// identifiers. Note that there is no guarantee of sequential consistency.
 #[doc(hidden)]
 pub trait CapacityInfoProvider {
-    /// Returns the current total number of registered unique [`BlazeMapId`] identifiers.
+    /// Returns the current total number of registered unique [`BlazeMapId`]
+    /// identifiers.
     fn offset_capacity(&self) -> usize;
 }
 
-/// May unsafely return the registered key corresponding to the offset specified.
+/// May unsafely return the registered key corresponding to the offset
+/// specified.
 #[doc(hidden)]
 pub trait KeyByOffsetProvider<K> {
     /// Returns the registered key corresponding to the offset specified.

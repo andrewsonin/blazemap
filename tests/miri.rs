@@ -4,11 +4,9 @@
 
 use std::io::Write;
 
-use rand::prelude::StdRng;
-use rand::{random, Rng, SeedableRng};
+use rand::{prelude::StdRng, random, Rng, SeedableRng};
 
-use blazemap::prelude::BlazeMap;
-use blazemap::{define_key_wrapper, define_key_wrapper_bounded};
+use blazemap::{define_key_wrapper, define_key_wrapper_bounded, prelude::BlazeMap};
 
 use crate::random_action::{ActionPeekWeights, EventWeights};
 
@@ -111,7 +109,7 @@ fn key_wrapper_bounded() {
             let mut rng = StdRng::seed_from_u64(seed);
             let mut map = BlazeMap::<Id, String>::new();
             #[allow(unused_variables)]
-                let mut j = 0;
+            let mut j = 0;
             for _ in 1..=num_actions {
                 #[cfg(miri)]
                 if j % 100 == 1 {

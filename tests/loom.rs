@@ -6,10 +6,12 @@ use std::string::ToString;
 
 use loom::thread;
 
-use blazemap::loom::TestableId;
-use blazemap::prelude::BlazeMapIdWrapper;
-use blazemap::traits::{CapacityInfoProvider, TypeInfoContainer};
-use blazemap::{define_key_wrapper, define_key_wrapper_bounded, define_plain_id};
+use blazemap::{
+    define_key_wrapper, define_key_wrapper_bounded, define_plain_id,
+    loom::TestableId,
+    prelude::BlazeMapIdWrapper,
+    traits::{CapacityInfoProvider, TypeInfoContainer},
+};
 
 fn run_model<F>(f: F)
 where

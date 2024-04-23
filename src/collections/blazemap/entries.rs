@@ -4,7 +4,8 @@ use crate::prelude::BlazeMapId;
 /// A view into a single entry in a map, which may either be vacant or occupied.
 ///
 /// This enum is constructed
-/// from the [`entry`] method on [`BlazeMap`](crate::collections::blazemap::BlazeMap).
+/// from the [`entry`] method on
+/// [`BlazeMap`](crate::collections::blazemap::BlazeMap).
 ///
 /// [`entry`]: crate::collections::blazemap::BlazeMap::entry
 pub enum Entry<'a, K, V>
@@ -18,8 +19,9 @@ where
 }
 
 #[derive(Debug)]
-/// A view into an occupied entry in a [`BlazeMap`](crate::collections::blazemap::BlazeMap).
-/// It is part of the [`Entry`] enum.
+/// A view into an occupied entry in a
+/// [`BlazeMap`](crate::collections::blazemap::BlazeMap). It is part of the
+/// [`Entry`] enum.
 pub struct OccupiedEntry<'a, K, V>
 where
     K: BlazeMapId,
@@ -32,8 +34,9 @@ where
 }
 
 #[derive(Debug)]
-/// A view into a vacant entry in a [`BlazeMap`](crate::collections::blazemap::BlazeMap).
-/// It is part of the [`Entry`] enum.
+/// A view into a vacant entry in a
+/// [`BlazeMap`](crate::collections::blazemap::BlazeMap). It is part of the
+/// [`Entry`] enum.
 pub struct VacantEntry<'a, K, V>
 where
     K: BlazeMapId,
@@ -65,8 +68,9 @@ where
         }
     }
 
-    /// Ensures a value is in the entry by inserting the result of the default function if empty,
-    /// and returns a mutable reference to the value in the entry.
+    /// Ensures a value is in the entry by inserting the result of the default
+    /// function if empty, and returns a mutable reference to the value in
+    /// the entry.
     #[inline]
     pub fn or_insert_with(self, default: impl FnOnce() -> V) -> &'a mut V {
         match self {
@@ -143,7 +147,8 @@ where
     /// Gets a mutable reference to the value in the entry.
     ///
     /// If you need a reference to the [`OccupiedEntry`]
-    /// which may outlive the destruction of the [`Entry`] value, see [`into_mut`].
+    /// which may outlive the destruction of the [`Entry`] value, see
+    /// [`into_mut`].
     ///
     /// [`into_mut`]: Self::into_mut
     #[inline]
@@ -154,7 +159,8 @@ where
     /// Converts the [`OccupiedEntry`] into a mutable reference
     /// to the value in the entry with a lifetime bound to the map itself.
     ///
-    /// If you need multiple references to the [`OccupiedEntry`], see [`get_mut`].
+    /// If you need multiple references to the [`OccupiedEntry`], see
+    /// [`get_mut`].
     ///
     /// [`get_mut`]: Self::get_mut
     #[inline]
@@ -181,7 +187,8 @@ impl<'a, K, V> VacantEntry<'a, K, V>
 where
     K: BlazeMapId,
 {
-    /// Gets the key that would be used when inserting a value through the [`VacantEntry`].
+    /// Gets the key that would be used when inserting a value through the
+    /// [`VacantEntry`].
     #[inline]
     pub fn key(&self) -> K {
         self.key

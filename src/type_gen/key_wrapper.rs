@@ -1,30 +1,35 @@
-/// Creates a new type that acts as an `usize`-based replacement for the old type
-/// that can be used as a key for `blazemap` collections.
+/// Creates a new type that acts as an `usize`-based replacement for the old
+/// type that can be used as a key for `blazemap` collections.
 ///
-/// This macro supports optional inference of standard traits using the following syntax:
+/// This macro supports optional inference of standard traits using the
+/// following syntax:
 ///
 /// * `Derive(as for Original Type)` — derives traits as for the original type
-///   for which `blazemap_key` is being registered. Each call to methods on these traits
-///   requires an additional `.read` call on the internal synchronization primitive,
-///   so — all other things being equal — their calls may be less optimal
-///   than the corresponding calls on instances of the original key's type.
-///   This method supports inference of the following traits:
+///   for which `blazemap_key` is being registered. Each call to methods on
+///   these traits requires an additional `.read` call on the internal
+///   synchronization primitive, so — all other things being equal — their calls
+///   may be less optimal than the corresponding calls on instances of the
+///   original key's type. This method supports inference of the following
+///   traits:
 ///   * `Default`
 ///   * `PartialOrd` (mutually exclusive with `Ord`)
-///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with `PartialOrd`)
+///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with
+///     `PartialOrd`)
 ///   * `Debug`
 ///   * `Display`
 ///   * `Serialize` (with `serde` feature only)
 ///   * `Deserialize` (with `serde` feature only)
-/// * `Derive(as for usize)` — derives traits in the same way as for
-///   the serial number assigned when registering an instance of the original type
-///   the first time [`BlazeMapIdWrapper::new`](crate::prelude::BlazeMapIdWrapper::new) was called.
-///   Because methods inferred by this option do not require additional
-///   locking on synchronization primitives,
-///   they do not incur any additional overhead compared to methods inferred for plain `usize`.
-///   This method supports inference of the following traits:
+/// * `Derive(as for usize)` — derives traits in the same way as for the serial
+///   number assigned when registering an instance of the original type the
+///   first time
+///   [`BlazeMapIdWrapper::new`](crate::prelude::BlazeMapIdWrapper::new) was
+///   called. Because methods inferred by this option do not require additional
+///   locking on synchronization primitives, they do not incur any additional
+///   overhead compared to methods inferred for plain `usize`. This method
+///   supports inference of the following traits:
 ///   * `PartialOrd` (mutually exclusive with `Ord`)
-///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with `PartialOrd`)
+///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with
+///     `PartialOrd`)
 ///
 /// # Example
 ///
@@ -169,8 +174,7 @@ macro_rules! key_wrapper_derive {
             #[inline]
             fn partial_cmp(&self, other: &Self) -> Option<::std::cmp::Ordering> {
                 use ::std::borrow::Borrow;
-                use $crate::traits::KeyByOffsetProvider;
-                use $crate::traits::TypeInfoContainer;
+                use $crate::traits::{KeyByOffsetProvider, TypeInfoContainer};
                 let Self(lhs) = self;
                 let Self(rhs) = other;
                 let guard = <Self as $crate::prelude::BlazeMapIdStatic>::static_container()
@@ -197,8 +201,7 @@ macro_rules! key_wrapper_derive {
             #[inline]
             fn cmp(&self, other: &Self) -> ::std::cmp::Ordering {
                 use ::std::borrow::Borrow;
-                use $crate::traits::KeyByOffsetProvider;
-                use $crate::traits::TypeInfoContainer;
+                use $crate::traits::{KeyByOffsetProvider, TypeInfoContainer};
 
                 let Self(lhs) = self;
                 let Self(rhs) = other;
@@ -219,8 +222,7 @@ macro_rules! key_wrapper_derive {
             #[inline]
             fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 use ::std::borrow::Borrow;
-                use $crate::traits::KeyByOffsetProvider;
-                use $crate::traits::TypeInfoContainer;
+                use $crate::traits::{KeyByOffsetProvider, TypeInfoContainer};
 
                 let mut f = f.debug_struct(::std::stringify!($new_type));
                 let offset = self.0.into_offset();
@@ -239,8 +241,7 @@ macro_rules! key_wrapper_derive {
             #[inline]
             fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 use ::std::borrow::Borrow;
-                use $crate::traits::KeyByOffsetProvider;
-                use $crate::traits::TypeInfoContainer;
+                use $crate::traits::{KeyByOffsetProvider, TypeInfoContainer};
 
                 let guard = <Self as $crate::prelude::BlazeMapIdStatic>::static_container()
                     .key_by_offset_provider();
@@ -276,8 +277,7 @@ macro_rules! key_wrapper_derive {
                 S: $crate::external::serde::Serializer,
             {
                 use ::std::borrow::Borrow;
-                use $crate::traits::KeyByOffsetProvider;
-                use $crate::traits::TypeInfoContainer;
+                use $crate::traits::{KeyByOffsetProvider, TypeInfoContainer};
 
                 unsafe {
                     <Self as $crate::prelude::BlazeMapIdStatic>::static_container()

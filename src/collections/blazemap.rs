@@ -1,6 +1,8 @@
-use std::borrow::Borrow;
-use std::fmt::{Debug, Formatter};
-use std::marker::PhantomData;
+use std::{
+    borrow::Borrow,
+    fmt::{Debug, Formatter},
+    marker::PhantomData,
+};
 
 #[cfg(feature = "serde")]
 use {
@@ -12,14 +14,16 @@ use {
     },
 };
 
-use crate::collections::blazemap::entries::VacantEntryInner;
 pub use crate::collections::blazemap::{
     entries::{Entry, OccupiedEntry, VacantEntry},
     iters::{Drain, IntoIter, IntoKeys, IntoValues, Iter, IterMut, Keys, Values, ValuesMut},
 };
-use crate::traits::CapacityInfoProvider;
-use crate::traits::KeyByOffsetProvider;
-use crate::traits::{BlazeMapId, BlazeMapIdStatic, TypeInfoContainer};
+use crate::{
+    collections::blazemap::entries::VacantEntryInner,
+    traits::{
+        BlazeMapId, BlazeMapIdStatic, CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer,
+    },
+};
 
 mod entries;
 mod iters;
@@ -58,7 +62,8 @@ impl<K, V> BlazeMap<K, V> {
         self.len == 0
     }
 
-    /// Clears the map, removing all key-value pairs. Keeps the allocated memory for reuse.
+    /// Clears the map, removing all key-value pairs. Keeps the allocated memory
+    /// for reuse.
     #[inline]
     pub fn clear(&mut self) {
         self.inner.clear();
@@ -66,8 +71,9 @@ impl<K, V> BlazeMap<K, V> {
     }
 
     /// Shrinks the capacity of the map as much as possible.
-    /// It will drop down as much as possible while maintaining the internal rules
-    /// and possibly leaving some space in accordance with the resize policy.
+    /// It will drop down as much as possible while maintaining the internal
+    /// rules and possibly leaving some space in accordance with the resize
+    /// policy.
     #[inline]
     pub fn shrink_to_fit(&mut self) {
         if !self.is_empty() {
@@ -91,7 +97,8 @@ impl<K, V> BlazeMap<K, V> {
     ///
     /// If the returned iterator is dropped before being fully consumed,
     /// it drops the remaining key-value pairs.
-    /// The returned iterator keeps a mutable borrow on the map to optimize its implementation.
+    /// The returned iterator keeps a mutable borrow on the map to optimize its
+    /// implementation.
     #[inline]
     pub fn drain(&mut self) -> Drain<'_, K, V> {
         debug_assert_eq!(
@@ -109,7 +116,8 @@ impl<K, V> BlazeMap<K, V>
 where
     K: BlazeMapId,
 {
-    /// An iterator visiting all key-value pairs. The iterator element type is `(K, &V)`.
+    /// An iterator visiting all key-value pairs. The iterator element type is
+    /// `(K, &V)`.
     #[inline]
     #[must_use]
     pub fn iter(&self) -> Iter<'_, K, V> {
@@ -125,8 +133,8 @@ where
         }
     }
 
-    /// An iterator visiting all key-value pairs, with mutable references to the values.
-    /// The iterator element type is `(K, &mut V)`.
+    /// An iterator visiting all key-value pairs, with mutable references to the
+    /// values. The iterator element type is `(K, &mut V)`.
     #[inline]
     pub fn iter_mut(&mut self) -> IterMut<'_, K, V> {
         debug_assert_eq!(
@@ -163,7 +171,8 @@ where
         Values { inner: self.iter() }
     }
 
-    /// An iterator visiting all values mutably. The iterator element type is `&mut V`.
+    /// An iterator visiting all values mutably. The iterator element type is
+    /// `&mut V`.
     #[inline]
     pub fn values_mut(&mut self) -> ValuesMut<'_, K, V> {
         debug_assert_eq!(
@@ -239,8 +248,8 @@ where
     ///
     /// If the map did not have this key present, None is returned.
     ///
-    /// If the map did have this key present, the value is updated, and the old value is returned.
-    /// The key is not updated, though.
+    /// If the map did have this key present, the value is updated, and the old
+    /// value is returned. The key is not updated, though.
     #[inline]
     pub fn insert(&mut self, key: K, value: V) -> Option<V> {
         debug_assert_eq!(
@@ -277,7 +286,8 @@ where
         result
     }
 
-    /// Gets the given key’s corresponding entry in the map for in-place manipulation.
+    /// Gets the given key’s corresponding entry in the map for in-place
+    /// manipulation.
     #[inline]
     pub fn entry(&mut self, key: K) -> Entry<'_, K, V> {
         debug_assert_eq!(
@@ -313,7 +323,8 @@ where
     }
 
     /// Creates a consuming iterator visiting all the keys.
-    /// The map cannot be used after calling this. The iterator element type is `K`.
+    /// The map cannot be used after calling this. The iterator element type is
+    /// `K`.
     #[inline]
     #[must_use]
     pub fn into_keys(self) -> IntoKeys<K, V> {
@@ -327,7 +338,8 @@ where
     }
 
     /// Creates a consuming iterator visiting all the values.
-    /// The map cannot be used after calling this. The iterator element type is `V`.
+    /// The map cannot be used after calling this. The iterator element type is
+    /// `V`.
     #[inline]
     #[must_use]
     pub fn into_values(self) -> IntoValues<K, V> {

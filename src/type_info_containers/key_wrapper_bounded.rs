@@ -1,9 +1,9 @@
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-use std::hash::Hash;
+use std::{
+    collections::{hash_map::Entry, HashMap},
+    hash::Hash,
+};
 
-use std::borrow::Borrow;
-use std::ops::Deref;
+use std::{borrow::Borrow, ops::Deref};
 #[cfg(not(loom))]
 use std::{
     cell::UnsafeCell,
@@ -12,8 +12,10 @@ use std::{
 
 use crate::sync::{AtomicUsize, Ordering, RwLock};
 
-use crate::prelude::BlazeMapId;
-use crate::traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey};
+use crate::{
+    prelude::BlazeMapId,
+    traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey},
+};
 
 #[cfg(loom)]
 use crate::sync::RwLockReadGuard;
@@ -21,10 +23,11 @@ use crate::sync::RwLockReadGuard;
 /// Global, statically initialized container with correspondence mapping
 /// between blazemap index wrappers and original keys.
 ///
-/// Being an analogue of [`KeyWrapperStaticContainer`](crate::type_info_containers::key_wrapper::StaticContainer)
+/// Being an analogue of
+/// [`KeyWrapperStaticContainer`](crate::type_info_containers::key_wrapper::StaticContainer)
 /// for the case when the user could statically guarantee
-/// that the number of unique keys doesn't exceed `CAP`, it's optimized for read operations
-/// so that they don't create any multi-thread contention.
+/// that the number of unique keys doesn't exceed `CAP`, it's optimized for read
+/// operations so that they don't create any multi-thread contention.
 #[cfg(not(loom))]
 #[doc(hidden)]
 #[derive(Debug)]
@@ -74,8 +77,9 @@ impl<K, const CAP: usize> StaticContainer<K, CAP> {
     ///
     /// # Safety
     /// Mustn't be used outside of loom tests,
-    /// since there is no guarantee that one [`BlazeMapId`](crate::prelude::BlazeMapId)
-    /// doesn't interact with different containers of the same type.
+    /// since there is no guarantee that one
+    /// [`BlazeMapId`](crate::prelude::BlazeMapId) doesn't interact with
+    /// different containers of the same type.
     #[inline]
     #[must_use]
     #[cfg(loom)]

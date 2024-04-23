@@ -1,6 +1,5 @@
 use crate::sync::{AtomicUsize, Ordering};
-use std::borrow::Borrow;
-use std::ops::Deref;
+use std::{borrow::Borrow, ops::Deref};
 
 use crate::traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer};
 
@@ -26,8 +25,9 @@ impl StaticContainer {
     ///
     /// # Safety
     /// Mustn't be used outside of loom tests,
-    /// since there is no guarantee that one [`BlazeMapId`](crate::prelude::BlazeMapId)
-    /// doesn't interact with different containers of the same type.
+    /// since there is no guarantee that one
+    /// [`BlazeMapId`](crate::prelude::BlazeMapId) doesn't interact with
+    /// different containers of the same type.
     #[inline]
     #[must_use]
     #[cfg(loom)]

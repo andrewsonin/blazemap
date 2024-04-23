@@ -13,8 +13,10 @@ use std::fmt::{Debug, Formatter, Write};
 
 use rand::Rng;
 
-use blazemap::prelude::BlazeMap;
-use blazemap::traits::{BlazeMapId, BlazeMapIdStatic};
+use blazemap::{
+    prelude::BlazeMap,
+    traits::{BlazeMapId, BlazeMapIdStatic},
+};
 
 #[derive(Debug)]
 pub enum Action<K, V: Clone> {

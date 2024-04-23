@@ -1,7 +1,8 @@
 //! Implements a [vector-based slab-like map](prelude::BlazeMap)
 //! with an interface similar to that of [`HashMap`](std::collections::HashMap),
 //! and also provides tools
-//! for generating lightweight identifiers that can be type-safely used as keys for this map.
+//! for generating lightweight identifiers that can be type-safely used as keys
+//! for this map.
 
 /// Collection types.
 pub mod collections;
@@ -34,5 +35,6 @@ pub mod external {
 
     #[cfg(loom)]
     pub use loom;
-    pub use {once_cell, parking_lot};
+    pub use once_cell;
+    pub use parking_lot;
 }

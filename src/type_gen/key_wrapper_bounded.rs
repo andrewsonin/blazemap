@@ -1,30 +1,34 @@
-/// Creates a new type that acts as an `usize`-based replacement for the old type
-/// that can be used as a key for `blazemap` collections.
+/// Creates a new type that acts as an `usize`-based replacement for the old
+/// type that can be used as a key for `blazemap` collections.
 /// Being an analogue of [`define_key_wrapper`](crate::define_key_wrapper)
 /// for the case when the user could statically guarantee
-/// that the number of unique keys doesn't exceed `MAX_CAP`, it's optimized for read operations
-/// so that they don't create any multi-thread contention.
+/// that the number of unique keys doesn't exceed `MAX_CAP`, it's optimized for
+/// read operations so that they don't create any multi-thread contention.
 ///
-/// This macro supports optional inference of standard traits using the following syntax:
+/// This macro supports optional inference of standard traits using the
+/// following syntax:
 ///
 /// * `Derive(as for Original Type)` — derives traits as for the original type
-///   for which `blazemap_key` is being registered.
-///   This method supports inference of the following traits:
+///   for which `blazemap_key` is being registered. This method supports
+///   inference of the following traits:
 ///   * `Default`
 ///   * `PartialOrd` (mutually exclusive with `Ord`)
-///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with `PartialOrd`)
+///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with
+///     `PartialOrd`)
 ///   * `Debug`
 ///   * `Display`
 ///   * `Serialize` (with `serde` feature only)
 ///   * `Deserialize` (with `serde` feature only)
-/// * `Derive(as for usize)` — derives traits in the same way as for
-///   the serial number assigned when registering an instance of the original type
-///   the first time [`BlazeMapIdWrapper::new`](crate::prelude::BlazeMapIdWrapper::new) was called.
-///   Methods inferred by this option do not incur any additional overhead
-///   compared to methods inferred for plain `usize`.
-///   This method supports inference of the following traits:
+/// * `Derive(as for usize)` — derives traits in the same way as for the serial
+///   number assigned when registering an instance of the original type the
+///   first time
+///   [`BlazeMapIdWrapper::new`](crate::prelude::BlazeMapIdWrapper::new) was
+///   called. Methods inferred by this option do not incur any additional
+///   overhead compared to methods inferred for plain `usize`. This method
+///   supports inference of the following traits:
 ///   * `PartialOrd` (mutually exclusive with `Ord`)
-///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with `PartialOrd`)
+///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with
+///     `PartialOrd`)
 ///
 /// # Example
 ///

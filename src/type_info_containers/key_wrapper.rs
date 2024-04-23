@@ -1,15 +1,18 @@
-use std::borrow::Borrow;
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-use std::hash::Hash;
-use std::ops::Deref;
+use std::{
+    borrow::Borrow,
+    collections::{hash_map::Entry, HashMap},
+    hash::Hash,
+    ops::Deref,
+};
 
 #[cfg(not(loom))]
 use once_cell::sync::Lazy;
 
-use crate::prelude::BlazeMapId;
-use crate::sync::RwLock;
-use crate::traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey};
+use crate::{
+    prelude::BlazeMapId,
+    sync::RwLock,
+    traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey},
+};
 
 /// Global, statically initialized container with correspondence mapping
 /// between blazemap offset wrappers and original keys.
@@ -49,8 +52,9 @@ impl<K> StaticContainer<K> {
     ///
     /// # Safety
     /// Mustn't be used outside of loom tests,
-    /// since there is no guarantee that one [`BlazeMapId`](crate::prelude::BlazeMapId)
-    /// doesn't interact with different containers of the same type.
+    /// since there is no guarantee that one
+    /// [`BlazeMapId`](crate::prelude::BlazeMapId) doesn't interact with
+    /// different containers of the same type.
     #[inline]
     #[must_use]
     #[cfg(loom)]

@@ -1,16 +1,18 @@
 /// Creates a new type based on incrementally generated `usize` instances
 /// that can be used as a key for `blazemap` collections.
 ///
-/// This macro supports optional inference of standard traits using the following syntax:
+/// This macro supports optional inference of standard traits using the
+/// following syntax:
 ///
-/// * `Derive` — derives traits in the same way as for
-///   the serial number assigned when creating a new instance of the type.
-///   Because methods inferred by this option do not require additional
-///   locking on synchronization primitives,
-///   they do not incur any additional overhead compared to methods inferred for plain `usize`.
-///   This method supports inference of the following traits:
+/// * `Derive` — derives traits in the same way as for the serial number
+///   assigned when creating a new instance of the type. Because methods
+///   inferred by this option do not require additional locking on
+///   synchronization primitives, they do not incur any additional overhead
+///   compared to methods inferred for plain `usize`. This method supports
+///   inference of the following traits:
 ///   * `PartialOrd` (mutually exclusive with `Ord`)
-///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with `PartialOrd`)
+///   * `Ord` (also derives `PartialOrd`, so mutually exclusive with
+///     `PartialOrd`)
 ///   * `Serialize` (with `serde` feature only)
 ///
 /// # Example
