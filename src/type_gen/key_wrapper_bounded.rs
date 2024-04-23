@@ -81,7 +81,8 @@ macro_rules! define_key_wrapper_bounded {
     (
         $(#[$attrs:meta])*
         $vis:vis
-        struct $new_type:ident($orig_type:ty)
+        struct $new_type:ident($orig_type:ty);
+        MAX_CAP = $capacity:literal
         $(; Derive(as for usize):         {$(  $to_derive_sn:ident),+ $(,)?} )?
         $(; Derive(as for Original Type): {$($to_derive_orig:ident),+ $(,)?} )?
         $(;)?
