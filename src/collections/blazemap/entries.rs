@@ -81,6 +81,7 @@ where
 
     /// Returns this entry’s key.
     #[inline]
+    #[must_use]
     pub fn key(&self) -> K {
         match self {
             Entry::Occupied(entry) => entry.key(),
@@ -125,6 +126,7 @@ where
 {
     /// Gets the key in the entry.
     #[inline]
+    #[must_use]
     pub fn key(&self) -> K {
         self.key
     }
@@ -140,6 +142,7 @@ where
 
     /// Gets a reference to the value in the entry.
     #[inline]
+    #[must_use]
     pub fn get(&self) -> &V {
         unsafe { self.value.as_ref().unwrap_unchecked() }
     }
@@ -152,6 +155,7 @@ where
     ///
     /// [`into_mut`]: Self::into_mut
     #[inline]
+    #[must_use]
     pub fn get_mut(&mut self) -> &mut V {
         unsafe { self.value.as_mut().unwrap_unchecked() }
     }
@@ -164,6 +168,7 @@ where
     ///
     /// [`get_mut`]: Self::get_mut
     #[inline]
+    #[must_use]
     pub fn into_mut(self) -> &'a mut V {
         unsafe { self.value.as_mut().unwrap_unchecked() }
     }
@@ -190,6 +195,7 @@ where
     /// Gets the key that would be used when inserting a value through the
     /// [`VacantEntry`].
     #[inline]
+    #[must_use]
     pub fn key(&self) -> K {
         self.key
     }

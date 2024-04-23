@@ -76,6 +76,8 @@ impl<K, V> BlazeMap<K, V> {
     /// policy.
     #[inline]
     pub fn shrink_to_fit(&mut self) {
+        let prev_len = self.inner.iter().filter_map(Option::as_ref).count();
+        debug_assert_eq!(prev_len, self.len);
         if !self.is_empty() {
             let elems_to_crop = self
                 .inner
@@ -86,10 +88,9 @@ impl<K, V> BlazeMap<K, V> {
             self.inner.truncate(self.inner.len() - elems_to_crop);
         }
         self.inner.shrink_to_fit();
-        debug_assert_eq!(
-            self.inner.iter().filter_map(Option::as_ref).count(),
-            self.len
-        );
+        let current_len = self.inner.iter().filter_map(Option::as_ref).count();
+        debug_assert_eq!(prev_len, current_len);
+        debug_assert_eq!(current_len, self.len);
     }
 
     /// Clears the map, returning all key-value pairs as an iterator.
@@ -100,6 +101,7 @@ impl<K, V> BlazeMap<K, V> {
     /// The returned iterator keeps a mutable borrow on the map to optimize its
     /// implementation.
     #[inline]
+    #[must_use]
     pub fn drain(&mut self) -> Drain<'_, K, V> {
         debug_assert_eq!(
             self.inner.iter().filter_map(Option::as_ref).count(),
@@ -136,6 +138,7 @@ where
     /// An iterator visiting all key-value pairs, with mutable references to the
     /// values. The iterator element type is `(K, &mut V)`.
     #[inline]
+    #[must_use]
     pub fn iter_mut(&mut self) -> IterMut<'_, K, V> {
         debug_assert_eq!(
             self.inner.iter().filter_map(Option::as_ref).count(),
@@ -174,6 +177,7 @@ where
     /// An iterator visiting all values mutably. The iterator element type is
     /// `&mut V`.
     #[inline]
+    #[must_use]
     pub fn values_mut(&mut self) -> ValuesMut<'_, K, V> {
         debug_assert_eq!(
             self.inner.iter().filter_map(Option::as_ref).count(),
@@ -211,6 +215,7 @@ where
 {
     /// Returns `true` if the map contains a value for the specified key.
     #[inline]
+    #[must_use]
     pub fn contains_key(&self, key: K) -> bool {
         debug_assert_eq!(
             self.inner.iter().filter_map(Option::as_ref).count(),
@@ -224,6 +229,7 @@ where
 
     /// Returns a reference to the value corresponding to the key.
     #[inline]
+    #[must_use]
     pub fn get(&self, key: K) -> Option<&V> {
         debug_assert_eq!(
             self.inner.iter().filter_map(Option::as_ref).count(),
@@ -234,6 +240,7 @@ where
 
     /// Returns a mutable reference to the value corresponding to the key.
     #[inline]
+    #[must_use]
     pub fn get_mut(&mut self, key: K) -> Option<&mut V> {
         debug_assert_eq!(
             self.inner.iter().filter_map(Option::as_ref).count(),
@@ -289,6 +296,7 @@ where
     /// Gets the given key’s corresponding entry in the map for in-place
     /// manipulation.
     #[inline]
+    #[must_use]
     pub fn entry(&mut self, key: K) -> Entry<'_, K, V> {
         debug_assert_eq!(
             self.inner.iter().filter_map(Option::as_ref).count(),
@@ -427,6 +435,7 @@ where
     K: BlazeMapId,
 {
     #[inline]
+    #[must_use]
     fn default() -> Self {
         Self::new()
     }
