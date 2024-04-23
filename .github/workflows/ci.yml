@@ -95,5 +95,7 @@ jobs:
           rustup toolchain install nightly --component miri
           rustup override set nightly
           cargo miri setup
+          cargo install cargo-binstall
+          cargo binstall cargo-nextest --no-confirm --secure
       - name: Run tests with Miri
-        run: cargo miri test --features serde
+        run: cargo miri nextest run --features serde --no-capture
