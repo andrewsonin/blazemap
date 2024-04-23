@@ -62,7 +62,7 @@ jobs:
 
   tests:
     name: "Tests"
-    needs: build
+    needs: [build, clippy]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -76,7 +76,7 @@ jobs:
 
   loom:
     name: "Loom"
-    needs: build
+    needs: [build, clippy]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -85,7 +85,7 @@ jobs:
 
   miri:
     name: "Miri"
-    needs: clippy
+    needs: [build, clippy]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
