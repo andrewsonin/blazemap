@@ -1,14 +1,16 @@
 [package]
 name = "blazemap"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Andrew Sonin <sonin.cel@yandex.ru>"]
-categories = ["data-structures"]
+categories = ["data-structures", "concurrency"]
 description = """
 Implements a vector-based slab-like map with an interface similar to that of HashMap, \
 and also provides tools for generating lightweight identifiers that can be type-safely used as keys for this map.
 """
 keywords = ["map", "slab", "hashmap"]
 license = "MIT"
+documentation = "https://docs.rs/blazemap/"
+homepage = "https://github.com/andrewsonin/blazemap"
 repository = "https://github.com/andrewsonin/blazemap"
 readme = "README.md"
 edition = "2021"
