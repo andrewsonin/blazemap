@@ -42,7 +42,7 @@
 ///         Debug,
 ///         Display,
 ///     };
-///     Derive(as for usize): {  // Optional section
+///     Derive(as for usize): {          // Optional section
 ///         Ord,
 ///     }
 /// }

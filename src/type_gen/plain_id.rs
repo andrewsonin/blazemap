@@ -22,7 +22,7 @@
 ///
 /// define_plain_id! {
 ///     pub struct Id;
-///     Derive: {       // Derive section is optional
+///     Derive: {       // Optional section
 ///         Ord
 ///     };
 /// }
