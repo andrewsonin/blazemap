@@ -29,6 +29,7 @@ pub mod prelude {
 }
 
 /// Public re-exports of external crates used.
+#[doc(hidden)]
 pub mod external {
     #[cfg(feature = "serde")]
     pub use serde;
