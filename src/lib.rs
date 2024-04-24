@@ -23,7 +23,6 @@ pub mod utils;
 pub mod prelude {
     pub use crate::{
         collections::blazemap::BlazeMap,
-        define_key_wrapper, define_key_wrapper_bounded, define_plain_id,
         traits::{AllInstancesIter, BlazeMapId, BlazeMapIdStatic, BlazeMapIdWrapper},
     };
 }

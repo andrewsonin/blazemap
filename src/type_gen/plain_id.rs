@@ -18,7 +18,7 @@
 /// # Example
 ///
 /// ```rust
-/// use blazemap::prelude::{BlazeMap, define_plain_id};
+/// use blazemap::{prelude::BlazeMap, define_plain_id};
 ///
 /// define_plain_id! {
 ///     pub struct Id;

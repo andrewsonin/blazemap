@@ -33,7 +33,7 @@
 /// # Example
 ///
 /// ```rust
-/// use blazemap::prelude::{BlazeMap, define_key_wrapper_bounded};
+/// use blazemap::{prelude::BlazeMap, define_key_wrapper_bounded};
 ///
 /// define_key_wrapper_bounded! {
 ///     pub struct Key(&'static str);
