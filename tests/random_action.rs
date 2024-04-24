@@ -8,6 +8,7 @@
 #![allow(clippy::enum_variant_names)]
 #![allow(clippy::explicit_write)]
 #![allow(clippy::module_name_repetitions)]
+#![allow(clippy::drop_non_drop)]
 
 use std::fmt::{Debug, Formatter, Write};
 
@@ -39,34 +40,13 @@ pub enum Action<K, V: Clone> {
     IntoIter(IterMut),
     Debug,
     Serialize,
+    Drop,
 }
 
 macro_rules! process_iter_action {
     ($log_suffix:ident, $rng:ident, $event:ident, $iterator:ident) => {
-        match $event {
-            Iter::Next => {
-                if let Some(v) = $iterator.next() {
-                    let mut io = std::io::sink();
-                    write!(io, "{:?}", v).unwrap();
-                }
-            }
-            Iter::Len => {
-                let _ = $iterator.len();
-            }
-            Iter::Clone => $iterator = $iterator.clone(),
-            Iter::Debug => {
-                let mut io = std::io::sink();
-                write!(io, "{:?}", $iterator).unwrap();
-            }
-        }
-        while $iterator.len() != 0 {
-            let event = IterPeekWeights::new(&(), $rng).generate($rng);
-            #[cfg(all(miri, feature = "miri_action_log"))]
-            {
-                println!("{} {:?}", $log_suffix, $event);
-                std::io::stdout().flush().unwrap();
-            };
-            match event {
+        'scope: {
+            match $event {
                 Iter::Next => {
                     if let Some(v) = $iterator.next() {
                         let mut io = std::io::sink();
@@ -81,6 +61,38 @@ macro_rules! process_iter_action {
                     let mut io = std::io::sink();
                     write!(io, "{:?}", $iterator).unwrap();
                 }
+                Iter::Drop => {
+                    drop($iterator);
+                    break 'scope;
+                }
+            }
+            while $iterator.len() != 0 {
+                let event = IterPeekWeights::new(&(), $rng).generate($rng);
+                #[cfg(all(miri, feature = "miri_action_log"))]
+                {
+                    println!("{} {:?}", $log_suffix, $event);
+                    std::io::stdout().flush().unwrap();
+                };
+                match event {
+                    Iter::Next => {
+                        if let Some(v) = $iterator.next() {
+                            let mut io = std::io::sink();
+                            write!(io, "{:?}", v).unwrap();
+                        }
+                    }
+                    Iter::Len => {
+                        let _ = $iterator.len();
+                    }
+                    Iter::Clone => $iterator = $iterator.clone(),
+                    Iter::Debug => {
+                        let mut io = std::io::sink();
+                        write!(io, "{:?}", $iterator).unwrap();
+                    }
+                    Iter::Drop => {
+                        drop($iterator);
+                        break 'scope;
+                    }
+                }
             }
         }
     };
@@ -88,29 +100,8 @@ macro_rules! process_iter_action {
 
 macro_rules! process_iter_mut_action {
     ($log_suffix:ident, $rng:ident, $event:ident, $iterator:ident) => {
-        match $event {
-            IterMut::Next => {
-                if let Some(v) = $iterator.next() {
-                    let mut io = std::io::sink();
-                    write!(io, "{:?}", v).unwrap();
-                }
-            }
-            IterMut::Len => {
-                let _ = $iterator.len();
-            }
-            IterMut::Debug => {
-                let mut io = std::io::sink();
-                write!(io, "{:?}", $iterator).unwrap();
-            }
-        }
-        while $iterator.len() != 0 {
-            let event = IterMutPeekWeights::new(&(), $rng).generate($rng);
-            #[cfg(all(miri, target = "miri_action_log"))]
-            {
-                println!("{} {:?}", $log_suffix, $event);
-                std::io::stdout().flush().unwrap();
-            };
-            match event {
+        'scope: {
+            match $event {
                 IterMut::Next => {
                     if let Some(v) = $iterator.next() {
                         let mut io = std::io::sink();
@@ -123,6 +114,37 @@ macro_rules! process_iter_mut_action {
                 IterMut::Debug => {
                     let mut io = std::io::sink();
                     write!(io, "{:?}", $iterator).unwrap();
+                }
+                IterMut::Drop => {
+                    drop($iterator);
+                    break 'scope;
+                }
+            }
+            while $iterator.len() != 0 {
+                let event = IterMutPeekWeights::new(&(), $rng).generate($rng);
+                #[cfg(all(miri, target = "miri_action_log"))]
+                {
+                    println!("{} {:?}", $log_suffix, $event);
+                    std::io::stdout().flush().unwrap();
+                };
+                match event {
+                    IterMut::Next => {
+                        if let Some(v) = $iterator.next() {
+                            let mut io = std::io::sink();
+                            write!(io, "{:?}", v).unwrap();
+                        }
+                    }
+                    IterMut::Len => {
+                        let _ = $iterator.len();
+                    }
+                    IterMut::Debug => {
+                        let mut io = std::io::sink();
+                        write!(io, "{:?}", $iterator).unwrap();
+                    }
+                    IterMut::Drop => {
+                        drop($iterator);
+                        break 'scope;
+                    }
                 }
             }
         }
@@ -229,6 +251,7 @@ impl Action<String, String> {
                                     write!(io, "{}", entry.insert(value)).unwrap();
                                 }
                                 OccupiedEntry::Remove => write!(io, "{}", entry.remove()).unwrap(),
+                                OccupiedEntry::Drop => drop(entry),
                             }
                         }
                         blazemap::collections::blazemap::Entry::Vacant(entry) => {
@@ -237,9 +260,11 @@ impl Action<String, String> {
                                 VacantEntry::Insert { value } => {
                                     write!(io, "{:?}", entry.insert(value)).unwrap();
                                 }
+                                VacantEntry::Drop => drop(entry),
                             }
                         }
                     },
+                    Entry::Drop => drop(entry),
                 }
             }
             Action::IntoKeys(event) => {
@@ -265,6 +290,10 @@ impl Action<String, String> {
                 let mut io = std::io::sink();
                 write!(io, "{}", serde_json::to_string(&map).unwrap()).unwrap();
             }
+            Action::Drop => {
+                let old = std::mem::replace(map, BlazeMap::new());
+                drop(old);
+            }
         }
     }
 }
@@ -286,6 +315,7 @@ pub enum Iter {
     Len,
     Clone,
     Debug,
+    Drop,
 }
 
 #[derive(Debug, Clone)]
@@ -293,6 +323,7 @@ pub enum IterMut {
     Next,
     Len,
     Debug,
+    Drop,
 }
 
 pub enum Entry<V> {
@@ -302,6 +333,7 @@ pub enum Entry<V> {
     AndModify { f: Box<dyn FnOnce(&mut V)> },
     OrDefault,
     EntryMatch(EntryMatch<V>),
+    Drop,
 }
 
 impl<V: Debug + Clone> Debug for Entry<V> {
@@ -316,6 +348,7 @@ impl<V: Debug + Clone> Debug for Entry<V> {
             AndModify,
             OrDefault,
             EntryMatch(EntryMatch<V>),
+            Drop,
         }
         let res = match self {
             Entry::OrInsert { value } => Helper::OrInsert {
@@ -326,6 +359,7 @@ impl<V: Debug + Clone> Debug for Entry<V> {
             Entry::AndModify { .. } => Helper::AndModify,
             Entry::OrDefault => Helper::OrDefault,
             Entry::EntryMatch(value) => Helper::EntryMatch(value.clone()),
+            Entry::Drop => Helper::Drop,
         };
         res.fmt(f)
     }
@@ -346,12 +380,14 @@ pub enum OccupiedEntry<V> {
     IntoMut,
     Insert { value: V },
     Remove,
+    Drop,
 }
 
 #[derive(Debug, Clone)]
 pub enum VacantEntry<V> {
     Key,
     Insert { value: V },
+    Drop,
 }
 
 pub trait EventWeights {
@@ -401,8 +437,9 @@ impl ActionPeekWeights {
     const INTO_ITER: f64 = 103.0;
     const DEBUG: f64 = 120.0;
     const SERIALIZE: f64 = 125.0;
+    const DROP: f64 = 125.5;
 
-    const MAX_WEIGHT: f64 = Self::SERIALIZE;
+    const MAX_WEIGHT: f64 = Self::DROP;
 }
 
 impl EventWeights for ActionPeekWeights {
@@ -464,6 +501,7 @@ impl EventWeights for ActionPeekWeights {
             ..=Self::INTO_ITER => Action::IntoIter(IterMutPeekWeights::new(&(), rng).generate(rng)),
             ..=Self::DEBUG => Action::Debug,
             ..=Self::SERIALIZE => Action::Serialize,
+            ..=Self::DROP => Action::Drop,
             value => unreachable!("`{}` isn't in range", value),
         }
     }
@@ -474,8 +512,9 @@ impl IterPeekWeights {
     const LEN: f64 = 10.5;
     const CLONE: f64 = 11.0;
     const DEBUG: f64 = 11.5;
+    const DROP: f64 = 12.0;
 
-    const MAX_WEIGHT: f64 = Self::DEBUG;
+    const MAX_WEIGHT: f64 = Self::DROP;
 }
 
 impl EventWeights for IterPeekWeights {
@@ -494,6 +533,7 @@ impl EventWeights for IterPeekWeights {
             ..=Self::LEN => Iter::Len,
             ..=Self::CLONE => Iter::Clone,
             ..=Self::DEBUG => Iter::Debug,
+            ..=Self::DROP => Iter::Drop,
             value => unreachable!("`{}` isn't in range", value),
         }
     }
@@ -503,8 +543,9 @@ impl IterMutPeekWeights {
     const NEXT: f64 = 10.0;
     const LEN: f64 = 10.5;
     const DEBUG: f64 = 11.0;
+    const DROP: f64 = 12.5;
 
-    const MAX_WEIGHT: f64 = Self::DEBUG;
+    const MAX_WEIGHT: f64 = Self::DROP;
 }
 
 impl EventWeights for IterMutPeekWeights {
@@ -522,6 +563,7 @@ impl EventWeights for IterMutPeekWeights {
             ..=Self::NEXT => IterMut::Next,
             ..=Self::LEN => IterMut::Len,
             ..=Self::DEBUG => IterMut::Debug,
+            ..=Self::DROP => IterMut::Drop,
             value => unreachable!("`{}` isn't in range", value),
         }
     }
@@ -534,8 +576,9 @@ impl EntryPeekWeights {
     const AND_MODIFY: f64 = 7.0;
     const OR_DEFAULT: f64 = 7.5;
     const ENTRY_MATCH: f64 = 9.0;
+    const DROP: f64 = 9.1;
 
-    const MAX_WEIGHT: f64 = Self::ENTRY_MATCH;
+    const MAX_WEIGHT: f64 = Self::DROP;
 }
 
 impl EventWeights for EntryPeekWeights {
@@ -580,6 +623,7 @@ impl EventWeights for EntryPeekWeights {
                 };
                 Entry::EntryMatch(entry)
             }
+            ..=Self::DROP => Entry::Drop,
             value => unreachable!("`{}` isn't in range", value),
         }
     }
@@ -593,8 +637,9 @@ impl OccupiedEntryPeekWeights {
     const INTO_MUT: f64 = 4.5;
     const INSERT: f64 = 5.5;
     const REMOVE: f64 = 6.0;
+    const DROP: f64 = 6.1;
 
-    const MAX_WEIGHT: f64 = Self::REMOVE;
+    const MAX_WEIGHT: f64 = Self::DROP;
 }
 
 impl EventWeights for OccupiedEntryPeekWeights {
@@ -621,6 +666,7 @@ impl EventWeights for OccupiedEntryPeekWeights {
                 OccupiedEntry::Insert { value }
             }
             ..=Self::REMOVE => OccupiedEntry::Remove,
+            ..=Self::DROP => OccupiedEntry::Drop,
             value => unreachable!("`{}` isn't in range", value),
         }
     }
@@ -629,8 +675,9 @@ impl EventWeights for OccupiedEntryPeekWeights {
 impl VacantEntryPeekWeights {
     const KEY: f64 = 0.5;
     const INSERT: f64 = 1.5;
+    const DROP: f64 = 1.53;
 
-    const MAX_WEIGHT: f64 = Self::INSERT;
+    const MAX_WEIGHT: f64 = Self::DROP;
 }
 
 impl EventWeights for VacantEntryPeekWeights {
@@ -652,6 +699,7 @@ impl EventWeights for VacantEntryPeekWeights {
                 let value = generate_random_string(self.random_string_len, rng);
                 VacantEntry::Insert { value }
             }
+            ..=Self::DROP => VacantEntry::Drop,
             value => unreachable!("`{}` isn't in range", value),
         }
     }
