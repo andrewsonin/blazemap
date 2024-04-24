@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next-header -->
 
+## [0.4.0] - 2024-04-24
+### Added
+- Hide public re-exports of external crates used.
+### Removed
+- Re-exports of key-type generating macros in `prelude`
+
 ## [0.3.0] - 2024-04-22
 ### Added
 - `BlazeMap` collection
@@ -16,3 +22,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next-url -->
 [0.3.0]: https://github.com/andrewsonin/blazemap/releases/tag/v0.3.0
+[0.4.0]: https://github.com/andrewsonin/blazemap/releases/tag/v0.4.0
