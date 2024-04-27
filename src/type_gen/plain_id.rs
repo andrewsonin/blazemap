@@ -71,6 +71,7 @@ macro_rules! plain_id_inner {
 
         impl $new_type
         {
+            #[doc = ::std::concat!("Creates a new instance of [`", ::std::stringify!($new_type), "`].")]
             #[inline]
             #[cfg(not(loom))]
             $vis fn new() -> Self {
@@ -78,6 +79,7 @@ macro_rules! plain_id_inner {
                 Self(unsafe { $crate::utils::OffsetProvider::<usize>::new(next_id) })
             }
 
+            #[doc = ::std::concat!("Creates a new instance of [`", ::std::stringify!($new_type), "`].")]
             #[inline]
             #[cfg(loom)]
             $vis fn new(type_info_container: &<Self as $crate::prelude::BlazeMapId>::TypeInfoContainer) -> Self {

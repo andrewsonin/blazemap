@@ -110,6 +110,7 @@ macro_rules! key_wrapper_inner {
         #[cfg(not(loom))]
         impl $new_type
         {
+            #[doc = ::std::concat!("Creates a new instance of [`", ::std::stringify!($new_type), "`].")]
             #[inline]
             $vis fn new(value: $orig_type) -> Self {
                 use $crate::traits::BlazeMapIdStatic;
