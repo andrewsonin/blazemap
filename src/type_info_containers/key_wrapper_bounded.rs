@@ -92,6 +92,16 @@ impl<K, const CAP: usize> StaticContainer<K, CAP> {
             next_offset: AtomicUsize::new(0),
         }
     }
+
+    #[inline]
+    #[doc(hidden)]
+    pub unsafe fn key_by_offset_unchecked(&self, offset: usize) -> &K {
+        #[cfg(not(loom))]
+        let result = (*self.offset_to_orig.get_unchecked(offset).get()).assume_init_ref();
+        #[cfg(loom)]
+        let result = BorrowGuard(self.offset_to_orig.get(offset).unwrap().read().unwrap());
+        result
+    }
 }
 
 impl<K, I, const CAP: usize> WrapKey<I> for StaticContainer<K, CAP>
@@ -206,10 +216,6 @@ impl<K> Borrow<K> for BorrowGuard<'_, K> {
 impl<K, const CAP: usize> KeyByOffsetProvider<K> for StaticContainer<K, CAP> {
     #[inline]
     unsafe fn key_by_offset_unchecked(&self, offset: usize) -> impl Borrow<K> {
-        #[cfg(not(loom))]
-        let result = (*self.offset_to_orig.get_unchecked(offset).get()).assume_init_ref();
-        #[cfg(loom)]
-        let result = BorrowGuard(self.offset_to_orig.get(offset).unwrap().read().unwrap());
-        result
+        StaticContainer::key_by_offset_unchecked(self, offset)
     }
 }

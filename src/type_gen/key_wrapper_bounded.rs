@@ -120,6 +120,19 @@ macro_rules! key_wrapper_bounded_inner {
                 use $crate::traits::BlazeMapIdStatic;
                 unsafe { <Self as $crate::prelude::BlazeMapIdWrapper>::new(Self::static_container(), value) }
             }
+
+            #[doc = ::std::concat!(
+                "Returns the original key corresponding to the [`",
+                ::std::stringify!($new_type),
+                "`] instance."
+            )]
+            #[inline]
+            #[must_use]
+            #[allow(dead_code)]
+            $vis fn key(self) -> &'static $orig_type {
+                let static_container = <Self as $crate::traits::BlazeMapIdStatic>::static_container();
+                unsafe { static_container.key_by_offset_unchecked(self.0.into_offset()) }
+            }
         }
 
         impl $crate::prelude::BlazeMapId for $new_type
