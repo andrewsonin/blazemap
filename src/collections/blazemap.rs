@@ -37,7 +37,7 @@ pub struct BlazeMap<K, V> {
 }
 
 impl<K, V> BlazeMap<K, V> {
-    /// Creates a new instance of the [`BlazeMap`].
+    /// Creates a new instance of [`BlazeMap`].
     #[inline]
     #[must_use]
     pub const fn new() -> Self {
@@ -193,7 +193,7 @@ impl<K, V> BlazeMap<K, V>
 where
     K: BlazeMapIdStatic,
 {
-    /// Creates a new instance of the [`BlazeMap`]
+    /// Creates a new instance of [`BlazeMap`]
     /// with capacity equal to the current total number of unique `K` instances.
     #[inline]
     #[must_use]
