@@ -95,12 +95,16 @@ impl<K, const CAP: usize> StaticContainer<K, CAP> {
 
     #[inline]
     #[doc(hidden)]
+    #[cfg(not(loom))]
     pub unsafe fn key_by_offset_unchecked(&self, offset: usize) -> &K {
-        #[cfg(not(loom))]
-        let result = (*self.offset_to_orig.get_unchecked(offset).get()).assume_init_ref();
-        #[cfg(loom)]
-        let result = BorrowGuard(self.offset_to_orig.get(offset).unwrap().read().unwrap());
-        result
+        (*self.offset_to_orig.get_unchecked(offset).get()).assume_init_ref()
+    }
+
+    #[inline]
+    #[doc(hidden)]
+    #[cfg(loom)]
+    pub unsafe fn key_by_offset_unchecked(&self, offset: usize) -> RwLockReadGuard<'_, Option<K>> {
+        self.offset_to_orig.get(offset).unwrap().read().unwrap()
     }
 }
 
@@ -216,6 +220,9 @@ impl<K> Borrow<K> for BorrowGuard<'_, K> {
 impl<K, const CAP: usize> KeyByOffsetProvider<K> for StaticContainer<K, CAP> {
     #[inline]
     unsafe fn key_by_offset_unchecked(&self, offset: usize) -> impl Borrow<K> {
-        StaticContainer::key_by_offset_unchecked(self, offset)
+        let result = StaticContainer::key_by_offset_unchecked(self, offset);
+        #[cfg(loom)]
+        let result = BorrowGuard(result);
+        result
     }
 }
