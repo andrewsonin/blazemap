@@ -4,7 +4,7 @@ mod key_wrapper;
 mod key_wrapper_bounded;
 mod plain_id;
 
-#[cfg(all(test, not(loom)))]
+#[cfg(all(test, not(feature = "loom")))]
 mod tests {
     use crate::{
         define_key_wrapper, define_key_wrapper_bounded, define_plain_id, prelude::BlazeMapId,

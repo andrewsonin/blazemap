@@ -31,7 +31,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build project
-        run: cargo build --all-targets --all-features
+        run: cargo build --all-targets --features full
 
   docs:
     name: "Docs"
@@ -56,9 +56,9 @@ jobs:
       - name: Run clippy
         run: cargo clippy
       - name: Run clippy with all features
-        run: cargo clippy --all-targets --all-features
+        run: cargo clippy --all-targets --features full
       - name: Run clippy on tests
-        run: cargo clippy --tests --all-targets --all-features
+        run: cargo clippy --tests --all-targets --features full
 
   tests:
     name: "Tests"
@@ -70,9 +70,9 @@ jobs:
       - name: Run tests
         run: cargo test
       - name: Run tests with all features
-        run: cargo test --all-features
+        run: cargo test --features full
       - name: Run tests with all features in release mode
-        run: cargo test --all-features --release
+        run: cargo test --features full --release
 
   loom:
     name: "Loom"
@@ -98,4 +98,4 @@ jobs:
           cargo install cargo-binstall
           cargo binstall cargo-nextest --no-confirm --secure
       - name: Run tests with Miri
-        run: cargo miri nextest run --features serde --test-threads 4
+        run: cargo miri nextest run --features full --test-threads 4

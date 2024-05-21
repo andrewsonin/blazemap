@@ -7,7 +7,7 @@
 /// Collection types.
 pub mod collections;
 /// Utilities for testing the codebase with [`loom`](crate::external::loom).
-#[cfg(loom)]
+#[cfg(feature = "loom")]
 pub mod loom;
 #[doc(hidden)]
 pub mod sync;
@@ -33,7 +33,7 @@ pub mod external {
     #[cfg(feature = "serde")]
     pub use serde;
 
-    #[cfg(loom)]
+    #[cfg(feature = "loom")]
     pub use loom;
     pub use once_cell;
     pub use parking_lot;

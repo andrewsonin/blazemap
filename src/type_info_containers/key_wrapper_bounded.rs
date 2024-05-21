@@ -4,7 +4,7 @@ use std::{
 };
 
 use std::{borrow::Borrow, ops::Deref};
-#[cfg(not(loom))]
+#[cfg(not(feature = "loom"))]
 use std::{
     cell::UnsafeCell,
     mem::{needs_drop, MaybeUninit},
@@ -17,7 +17,7 @@ use crate::{
     traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey},
 };
 
-#[cfg(loom)]
+#[cfg(feature = "loom")]
 use crate::sync::RwLockReadGuard;
 
 /// Global, statically initialized container with correspondence mapping
@@ -28,7 +28,7 @@ use crate::sync::RwLockReadGuard;
 /// for the case when the user could statically guarantee
 /// that the number of unique keys doesn't exceed `CAP`, it's optimized for read
 /// operations so that they don't create any multi-thread contention.
-#[cfg(not(loom))]
+#[cfg(not(feature = "loom"))]
 #[doc(hidden)]
 #[derive(Debug)]
 pub struct StaticContainer<K, const CAP: usize> {
@@ -41,7 +41,7 @@ pub struct StaticContainer<K, const CAP: usize> {
 /// Note that it cannot be static
 /// due to the [`loom` inability](https://github.com/tokio-rs/loom/issues/290)
 /// to test statically initialized code.
-#[cfg(loom)]
+#[cfg(feature = "loom")]
 #[doc(hidden)]
 #[derive(Debug)]
 pub struct StaticContainer<K, const CAP: usize> {
@@ -50,7 +50,7 @@ pub struct StaticContainer<K, const CAP: usize> {
     next_offset: AtomicUsize,
 }
 
-#[cfg(not(loom))]
+#[cfg(not(feature = "loom"))]
 impl<K, const CAP: usize> Default for StaticContainer<K, CAP> {
     #[inline]
     fn default() -> Self {
@@ -64,11 +64,19 @@ impl<K, const CAP: usize> Default for StaticContainer<K, CAP> {
     }
 }
 
+#[cfg(feature = "loom")]
+impl<K, const CAP: usize> Default for StaticContainer<K, CAP> {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<K, const CAP: usize> StaticContainer<K, CAP> {
     /// Creates a new instance of [`StaticContainer`].
     #[inline]
     #[must_use]
-    #[cfg(not(loom))]
+    #[cfg(not(feature = "loom"))]
     pub fn new() -> Self {
         Self::default()
     }
@@ -82,7 +90,7 @@ impl<K, const CAP: usize> StaticContainer<K, CAP> {
     /// different containers of the same type.
     #[inline]
     #[must_use]
-    #[cfg(loom)]
+    #[cfg(feature = "loom")]
     pub fn new() -> Self {
         Self {
             offset_to_orig: std::iter::repeat_with(|| RwLock::new(None))
@@ -95,14 +103,14 @@ impl<K, const CAP: usize> StaticContainer<K, CAP> {
 
     #[inline]
     #[doc(hidden)]
-    #[cfg(not(loom))]
+    #[cfg(not(feature = "loom"))]
     pub unsafe fn key_by_offset_unchecked(&self, offset: usize) -> &K {
         (*self.offset_to_orig.get_unchecked(offset).get()).assume_init_ref()
     }
 
     #[inline]
     #[doc(hidden)]
-    #[cfg(loom)]
+    #[cfg(feature = "loom")]
     pub unsafe fn key_by_offset_unchecked(&self, offset: usize) -> RwLockReadGuard<'_, Option<K>> {
         self.offset_to_orig.get(offset).unwrap().read().unwrap()
     }
@@ -115,17 +123,17 @@ where
 {
     #[inline]
     fn wrap_key(&self, key: K) -> I {
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         let offset = self.orig_to_offset.read().get(&key).copied();
-        #[cfg(loom)]
+        #[cfg(feature = "loom")]
         let offset = self.orig_to_offset.read().unwrap().get(&key).copied();
         unsafe {
             if let Some(offset) = offset {
                 I::from_offset_unchecked(offset)
             } else {
-                #[cfg(not(loom))]
+                #[cfg(not(feature = "loom"))]
                 let mut guard = self.orig_to_offset.write();
-                #[cfg(loom)]
+                #[cfg(feature = "loom")]
                 let mut guard = self.orig_to_offset.write().unwrap();
                 let offset = match guard.entry(key) {
                     Entry::Vacant(entry) => {
@@ -134,15 +142,13 @@ where
                             .offset_to_orig
                             .get(offset)
                             .unwrap_or_else(|| panic!("capacity {CAP} overflow"));
-                        #[cfg(not(loom))]
+                        #[cfg(not(feature = "loom"))]
                         (*cell.get()).write(entry.key().clone());
-                        #[cfg(loom)]
+                        #[cfg(feature = "loom")]
                         {
                             let mut guard = cell.try_write().unwrap();
                             let value = &mut *guard;
-                            if value.is_some() {
-                                panic!("value is already set")
-                            }
+                            assert!(value.is_none(), "value is already set");
                             *value = Some(entry.key().clone());
                         }
                         entry.insert(offset);
@@ -161,22 +167,22 @@ where
 impl<K, const CAP: usize> Drop for StaticContainer<K, CAP> {
     #[inline]
     fn drop(&mut self) {
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         if !needs_drop::<K>() {
             return;
         }
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         let num_init = *self.next_offset.get_mut();
-        #[cfg(loom)]
+        #[cfg(feature = "loom")]
         let num_init = self.next_offset.load(Ordering::Acquire);
         self.offset_to_orig.as_mut_slice()[..num_init]
             .iter_mut()
             .for_each(|cell| {
-                #[cfg(not(loom))]
+                #[cfg(not(feature = "loom"))]
                 unsafe {
                     cell.get_mut().assume_init_drop();
                 };
-                #[cfg(loom)]
+                #[cfg(feature = "loom")]
                 let _ = cell.try_write().unwrap().take();
             });
     }
@@ -207,10 +213,10 @@ impl<K, const CAP: usize> CapacityInfoProvider for StaticContainer<K, CAP> {
     }
 }
 
-#[cfg(loom)]
+#[cfg(feature = "loom")]
 struct BorrowGuard<'a, K>(RwLockReadGuard<'a, Option<K>>);
 
-#[cfg(loom)]
+#[cfg(feature = "loom")]
 impl<K> Borrow<K> for BorrowGuard<'_, K> {
     fn borrow(&self) -> &K {
         self.0.as_ref().unwrap()
@@ -221,7 +227,7 @@ impl<K, const CAP: usize> KeyByOffsetProvider<K> for StaticContainer<K, CAP> {
     #[inline]
     unsafe fn key_by_offset_unchecked(&self, offset: usize) -> impl Borrow<K> {
         let result = StaticContainer::key_by_offset_unchecked(self, offset);
-        #[cfg(loom)]
+        #[cfg(feature = "loom")]
         let result = BorrowGuard(result);
         result
     }

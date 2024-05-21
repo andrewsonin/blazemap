@@ -107,7 +107,7 @@ macro_rules! key_wrapper_inner {
         #[repr(transparent)]
         $vis struct $new_type($crate::utils::OffsetProvider<usize>);
 
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         impl $new_type
         {
             #[doc = ::std::concat!("Creates a new instance of [`", ::std::stringify!($new_type), "`].")]
@@ -134,7 +134,7 @@ macro_rules! key_wrapper_inner {
             }
         }
 
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         impl $crate::traits::BlazeMapIdStatic for $new_type
         {
             #[inline]

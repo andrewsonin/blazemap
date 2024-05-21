@@ -10,11 +10,18 @@ pub struct StaticContainer {
     next_offset: AtomicUsize,
 }
 
+impl Default for StaticContainer {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl StaticContainer {
     /// Creates a new instance of [`StaticContainer`].
     #[inline]
     #[must_use]
-    #[cfg(not(loom))]
+    #[cfg(not(feature = "loom"))]
     pub const fn new() -> Self {
         Self {
             next_offset: AtomicUsize::new(0),
@@ -30,7 +37,7 @@ impl StaticContainer {
     /// different containers of the same type.
     #[inline]
     #[must_use]
-    #[cfg(loom)]
+    #[cfg(feature = "loom")]
     pub fn new() -> Self {
         Self {
             next_offset: AtomicUsize::new(0),
@@ -39,6 +46,7 @@ impl StaticContainer {
 
     /// Returns the next identifier.
     #[inline]
+    #[must_use]
     pub fn next_id(&self) -> usize {
         self.next_offset
             .fetch_update(Ordering::Release, Ordering::Acquire, |next_id| {

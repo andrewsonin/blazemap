@@ -14,4 +14,4 @@
 time RUSTFLAGS="${RUSTFLAGS} --cfg loom -C debug-assertions" \
     RUST_BACKTRACE=full \
     LOOM_LOCATION=1 \
-    cargo test --release --test loom "$@" -- --nocapture
+    cargo test --release --test loom --features loom "$@" -- --nocapture

@@ -73,7 +73,7 @@ macro_rules! plain_id_inner {
         {
             #[doc = ::std::concat!("Creates a new instance of [`", ::std::stringify!($new_type), "`].")]
             #[inline]
-            #[cfg(not(loom))]
+            #[cfg(not(feature = "loom"))]
             $vis fn new() -> Self {
                 let next_id = <Self as $crate::prelude::BlazeMapIdStatic>::static_container().next_id();
                 Self(unsafe { $crate::utils::OffsetProvider::<usize>::new(next_id) })
@@ -81,7 +81,7 @@ macro_rules! plain_id_inner {
 
             #[doc = ::std::concat!("Creates a new instance of [`", ::std::stringify!($new_type), "`].")]
             #[inline]
-            #[cfg(loom)]
+            #[cfg(feature = "loom")]
             $vis fn new(type_info_container: &<Self as $crate::prelude::BlazeMapId>::TypeInfoContainer) -> Self {
                 let next_id = type_info_container.next_id();
                 Self(unsafe { $crate::utils::OffsetProvider::<usize>::new(next_id) })
@@ -104,7 +104,7 @@ macro_rules! plain_id_inner {
             }
         }
 
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         impl $crate::traits::BlazeMapIdStatic for $new_type
         {
             #[inline]

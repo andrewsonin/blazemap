@@ -5,7 +5,7 @@ use std::{
     ops::Deref,
 };
 
-#[cfg(not(loom))]
+#[cfg(not(feature = "loom"))]
 use once_cell::sync::Lazy;
 
 use crate::{
@@ -16,7 +16,7 @@ use crate::{
 
 /// Global, statically initialized container with correspondence mapping
 /// between blazemap offset wrappers and original keys.
-#[cfg(not(loom))]
+#[cfg(not(feature = "loom"))]
 #[doc(hidden)]
 #[derive(Debug)]
 pub struct StaticContainer<K> {
@@ -28,7 +28,7 @@ pub struct StaticContainer<K> {
 /// Note that it cannot be static
 /// due to the [`loom` inability](https://github.com/tokio-rs/loom/issues/290)
 /// to test statically initialized code.
-#[cfg(loom)]
+#[cfg(feature = "loom")]
 #[doc(hidden)]
 #[derive(Debug)]
 pub struct StaticContainer<K> {
@@ -36,11 +36,18 @@ pub struct StaticContainer<K> {
     orig_to_offset: HashMap<K, usize>,
 }
 
+impl<K> Default for StaticContainer<K> {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<K> StaticContainer<K> {
     /// Creates a new instance of [`StaticContainer`].
     #[inline]
     #[must_use]
-    #[cfg(not(loom))]
+    #[cfg(not(feature = "loom"))]
     pub const fn new() -> Self {
         Self {
             offset_to_orig: vec![],
@@ -57,7 +64,7 @@ impl<K> StaticContainer<K> {
     /// different containers of the same type.
     #[inline]
     #[must_use]
-    #[cfg(loom)]
+    #[cfg(feature = "loom")]
     pub fn new() -> Self {
         Self {
             offset_to_orig: vec![],
@@ -73,17 +80,17 @@ where
 {
     #[inline]
     fn wrap_key(&self, key: K) -> I {
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         let offset = self.read().orig_to_offset.get(&key).copied();
-        #[cfg(loom)]
+        #[cfg(feature = "loom")]
         let offset = self.read().unwrap().orig_to_offset.get(&key).copied();
         unsafe {
             if let Some(offset) = offset {
                 I::from_offset_unchecked(offset)
             } else {
-                #[cfg(not(loom))]
+                #[cfg(not(feature = "loom"))]
                 let mut guard = self.write();
-                #[cfg(loom)]
+                #[cfg(feature = "loom")]
                 let mut guard = self.write().unwrap();
                 let container = &mut *guard;
                 let offset = match container.orig_to_offset.entry(key) {
@@ -110,9 +117,9 @@ where
 
     #[inline]
     fn capacity_info_provider(&self) -> impl Deref<Target = impl CapacityInfoProvider> {
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         let result = self.read();
-        #[cfg(loom)]
+        #[cfg(feature = "loom")]
         let result = self.read().unwrap();
         result
     }
@@ -121,9 +128,9 @@ where
     fn key_by_offset_provider(
         &self,
     ) -> impl Deref<Target = impl KeyByOffsetProvider<Self::OrigType>> {
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         let result = self.read();
-        #[cfg(loom)]
+        #[cfg(feature = "loom")]
         let result = self.read().unwrap();
         result
     }
@@ -139,9 +146,9 @@ impl<K> CapacityInfoProvider for StaticContainer<K> {
 impl<K> KeyByOffsetProvider<K> for StaticContainer<K> {
     #[inline]
     unsafe fn key_by_offset_unchecked(&self, offset: usize) -> impl Borrow<K> {
-        #[cfg(not(loom))]
+        #[cfg(not(feature = "loom"))]
         let result = self.offset_to_orig.get_unchecked(offset);
-        #[cfg(loom)]
+        #[cfg(feature = "loom")]
         let result = self.offset_to_orig.get(offset).unwrap();
         result
     }
