@@ -1,7 +1,8 @@
-use crate::sync::{AtomicUsize, Ordering};
+use crate::{
+    sync::{AtomicUsize, Ordering},
+    traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer},
+};
 use std::{borrow::Borrow, ops::Deref};
-
-use crate::traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer};
 
 /// Global, statically initialized offset generator.
 #[doc(hidden)]

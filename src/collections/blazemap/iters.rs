@@ -1,14 +1,13 @@
+use crate::{
+    collections::blazemap::BlazeMap,
+    prelude::{BlazeMapId, BlazeMapIdStatic},
+    traits::{KeyByOffsetProvider, TypeInfoContainer},
+};
 use std::{
     borrow::Borrow,
     fmt::{Debug, Formatter},
     marker::PhantomData,
     panic::{RefUnwindSafe, UnwindSafe},
-};
-
-use crate::{
-    collections::blazemap::BlazeMap,
-    prelude::{BlazeMapId, BlazeMapIdStatic},
-    traits::{KeyByOffsetProvider, TypeInfoContainer},
 };
 
 /// An iterator over the entries of a [`BlazeMap`].

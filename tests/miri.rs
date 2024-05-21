@@ -1,12 +1,9 @@
 #![cfg(all(not(loom), feature = "serde"))]
 
-use std::io::Write;
-
-use rand::{prelude::StdRng, random, Rng, SeedableRng};
-
-use blazemap::{define_key_wrapper, define_key_wrapper_bounded, prelude::BlazeMap};
-
 use crate::random_action::{ActionPeekWeights, EventWeights};
+use blazemap::{define_key_wrapper, define_key_wrapper_bounded, prelude::BlazeMap};
+use rand::{prelude::StdRng, random, Rng, SeedableRng};
+use std::io::Write;
 
 mod random_action;
 

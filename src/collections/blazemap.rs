@@ -1,19 +1,3 @@
-use std::{
-    borrow::Borrow,
-    fmt::{Debug, Formatter},
-    marker::PhantomData,
-};
-
-#[cfg(feature = "serde")]
-use {
-    crate::prelude::BlazeMapIdWrapper,
-    serde::{
-        de::{MapAccess, Visitor},
-        ser::SerializeMap,
-        Deserialize, Deserializer, Serialize, Serializer,
-    },
-};
-
 pub use crate::collections::blazemap::{
     entries::{Entry, OccupiedEntry, VacantEntry},
     iters::{Drain, IntoIter, IntoKeys, IntoValues, Iter, IterMut, Keys, Values, ValuesMut},
@@ -22,6 +6,20 @@ use crate::{
     collections::blazemap::entries::VacantEntryInner,
     traits::{
         BlazeMapId, BlazeMapIdStatic, CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer,
+    },
+};
+use std::{
+    borrow::Borrow,
+    fmt::{Debug, Formatter},
+    marker::PhantomData,
+};
+#[cfg(feature = "serde")]
+use {
+    crate::prelude::BlazeMapIdWrapper,
+    serde::{
+        de::{MapAccess, Visitor},
+        ser::SerializeMap,
+        Deserialize, Deserializer, Serialize, Serializer,
     },
 };
 

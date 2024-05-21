@@ -1,10 +1,10 @@
-use std::{cmp::Ordering, marker::PhantomData};
-
-use crate::prelude::AllInstancesIter;
+use crate::{
+    prelude::AllInstancesIter,
+    traits::{BlazeMapId, TypeInfoContainer},
+};
 #[cfg(feature = "serde")]
 use serde::{Serialize, Serializer};
-
-use crate::traits::{BlazeMapId, TypeInfoContainer};
+use std::{cmp::Ordering, marker::PhantomData};
 
 /// Provides `PartialOrd`, `Ord` and `Serialize` traits, which are derived as
 /// for an original type, for [`BlazeMapId`]s in the

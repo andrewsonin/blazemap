@@ -1,17 +1,15 @@
+use crate::{
+    prelude::BlazeMapId,
+    sync::RwLock,
+    traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey},
+};
+#[cfg(not(feature = "loom"))]
+use once_cell::sync::Lazy;
 use std::{
     borrow::Borrow,
     collections::{hash_map::Entry, HashMap},
     hash::Hash,
     ops::Deref,
-};
-
-#[cfg(not(feature = "loom"))]
-use once_cell::sync::Lazy;
-
-use crate::{
-    prelude::BlazeMapId,
-    sync::RwLock,
-    traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey},
 };
 
 /// Global, statically initialized container with correspondence mapping

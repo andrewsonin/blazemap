@@ -1,17 +1,14 @@
 #![cfg(loom)]
 
-use blazemap::sync::RwLock;
-use loom::sync::Arc;
-use std::string::ToString;
-
-use loom::thread;
-
 use blazemap::{
     define_key_wrapper, define_key_wrapper_bounded, define_plain_id,
     loom::TestableId,
     prelude::BlazeMapIdWrapper,
+    sync::RwLock,
     traits::{CapacityInfoProvider, TypeInfoContainer},
 };
+use loom::{sync::Arc, thread};
+use std::string::ToString;
 
 fn run_model<F>(f: F)
 where

@@ -10,14 +10,12 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::drop_non_drop)]
 
-use std::fmt::{Debug, Formatter, Write};
-
-use rand::Rng;
-
 use blazemap::{
     prelude::BlazeMap,
     traits::{BlazeMapId, BlazeMapIdStatic},
 };
+use rand::Rng;
+use std::fmt::{Debug, Formatter, Write};
 
 #[derive(Debug)]
 pub enum Action<K, V: Clone> {

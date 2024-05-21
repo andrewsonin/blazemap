@@ -1,24 +1,21 @@
+#[cfg(feature = "loom")]
+use crate::sync::RwLockReadGuard;
+use crate::{
+    prelude::BlazeMapId,
+    sync::{AtomicUsize, Ordering, RwLock},
+    traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey},
+};
 use std::{
+    borrow::Borrow,
     collections::{hash_map::Entry, HashMap},
     hash::Hash,
+    ops::Deref,
 };
-
-use std::{borrow::Borrow, ops::Deref};
 #[cfg(not(feature = "loom"))]
 use std::{
     cell::UnsafeCell,
     mem::{needs_drop, MaybeUninit},
 };
-
-use crate::sync::{AtomicUsize, Ordering, RwLock};
-
-use crate::{
-    prelude::BlazeMapId,
-    traits::{CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer, WrapKey},
-};
-
-#[cfg(feature = "loom")]
-use crate::sync::RwLockReadGuard;
 
 /// Global, statically initialized container with correspondence mapping
 /// between blazemap index wrappers and original keys.
