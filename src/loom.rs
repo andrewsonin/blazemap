@@ -7,7 +7,7 @@ use serde::{Serialize, Serializer};
 use crate::traits::{BlazeMapId, TypeInfoContainer};
 
 /// Provides `PartialOrd`, `Ord` and `Serialize` traits, which are derived as
-/// for original type, for [`BlazeMapId`]s in the
+/// for an original type, for [`BlazeMapId`]s in the
 /// [`loom`](crate::external::loom) context.
 #[derive(Debug, Copy, Clone)]
 pub struct TestableId<'a, I, C> {

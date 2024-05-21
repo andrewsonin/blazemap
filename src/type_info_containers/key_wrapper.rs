@@ -25,7 +25,7 @@ pub struct StaticContainer<K> {
 }
 
 /// Loom-testable version of the above container.
-/// Note that it cannot be actually static
+/// Note that it cannot be static
 /// due to the [`loom` inability](https://github.com/tokio-rs/loom/issues/290)
 /// to test statically initialized code.
 #[cfg(loom)]
