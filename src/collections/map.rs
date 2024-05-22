@@ -1,9 +1,11 @@
-pub use crate::collections::blazemap::{
+#![allow(clippy::module_name_repetitions)]
+
+pub use crate::collections::map::{
     entries::{Entry, OccupiedEntry, VacantEntry},
     iters::{Drain, IntoIter, IntoKeys, IntoValues, Iter, IterMut, Keys, Values, ValuesMut},
 };
 use crate::{
-    collections::blazemap::entries::VacantEntryInner,
+    collections::map::entries::VacantEntryInner,
     traits::{
         BlazeMapId, BlazeMapIdStatic, CapacityInfoProvider, KeyByOffsetProvider, TypeInfoContainer,
     },
@@ -29,8 +31,8 @@ mod iters;
 /// A [`Vec`]-based analogue of a [`HashMap`](std::collections::HashMap).
 #[derive(Clone, PartialEq, Eq)]
 pub struct BlazeMap<K, V> {
-    pub(in crate::collections::blazemap) inner: Vec<Option<V>>,
-    pub(in crate::collections::blazemap) len: usize,
+    pub(in crate::collections::map) inner: Vec<Option<V>>,
+    pub(in crate::collections::map) len: usize,
     phantom: PhantomData<K>,
 }
 

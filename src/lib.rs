@@ -22,7 +22,7 @@ pub mod utils;
 /// Crate prelude.
 pub mod prelude {
     pub use crate::{
-        collections::blazemap::BlazeMap,
+        collections::map::BlazeMap,
         traits::{AllInstancesIter, BlazeMapId, BlazeMapIdStatic, BlazeMapIdWrapper},
     };
 }

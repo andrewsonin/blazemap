@@ -234,7 +234,7 @@ impl Action<String, String> {
                         write!(io, "{}", entry.or_default()).unwrap();
                     }
                     Entry::EntryMatch(event) => match entry {
-                        blazemap::collections::blazemap::Entry::Occupied(mut entry) => {
+                        blazemap::collections::map::Entry::Occupied(mut entry) => {
                             match event.on_occupied {
                                 OccupiedEntry::Key => write!(io, "{:?}", entry.key()).unwrap(),
                                 OccupiedEntry::RemoveEntry => {
@@ -252,15 +252,13 @@ impl Action<String, String> {
                                 OccupiedEntry::Drop => drop(entry),
                             }
                         }
-                        blazemap::collections::blazemap::Entry::Vacant(entry) => {
-                            match event.on_vacant {
-                                VacantEntry::Key => write!(io, "{:?}", entry.key()).unwrap(),
-                                VacantEntry::Insert { value } => {
-                                    write!(io, "{:?}", entry.insert(value)).unwrap();
-                                }
-                                VacantEntry::Drop => drop(entry),
+                        blazemap::collections::map::Entry::Vacant(entry) => match event.on_vacant {
+                            VacantEntry::Key => write!(io, "{:?}", entry.key()).unwrap(),
+                            VacantEntry::Insert { value } => {
+                                write!(io, "{:?}", entry.insert(value)).unwrap();
                             }
-                        }
+                            VacantEntry::Drop => drop(entry),
+                        },
                     },
                     Entry::Drop => drop(entry),
                 }

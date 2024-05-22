@@ -5,9 +5,9 @@ use crate::prelude::BlazeMapId;
 ///
 /// This enum is constructed
 /// from the [`entry`] method on
-/// [`BlazeMap`](crate::collections::blazemap::BlazeMap).
+/// [`BlazeMap`](crate::collections::map::BlazeMap).
 ///
-/// [`entry`]: crate::collections::blazemap::BlazeMap::entry
+/// [`entry`]: crate::collections::map::BlazeMap::entry
 pub enum Entry<'a, K, V>
 where
     K: BlazeMapId,
@@ -20,36 +20,36 @@ where
 
 #[derive(Debug)]
 /// A view into an occupied entry in a
-/// [`BlazeMap`](crate::collections::blazemap::BlazeMap). It is part of the
+/// [`BlazeMap`](crate::collections::map::BlazeMap). It is part of the
 /// [`Entry`] enum.
 pub struct OccupiedEntry<'a, K, V>
 where
     K: BlazeMapId,
 {
-    pub(in crate::collections::blazemap) key: K,
+    pub(in crate::collections::map) key: K,
 
-    pub(in crate::collections::blazemap) len: &'a mut usize,
+    pub(in crate::collections::map) len: &'a mut usize,
 
-    pub(in crate::collections::blazemap) value: &'a mut Option<V>,
+    pub(in crate::collections::map) value: &'a mut Option<V>,
 }
 
 #[derive(Debug)]
 /// A view into a vacant entry in a
-/// [`BlazeMap`](crate::collections::blazemap::BlazeMap). It is part of the
+/// [`BlazeMap`](crate::collections::map::BlazeMap). It is part of the
 /// [`Entry`] enum.
 pub struct VacantEntry<'a, K, V>
 where
     K: BlazeMapId,
 {
-    pub(in crate::collections::blazemap) key: K,
+    pub(in crate::collections::map) key: K,
 
-    pub(in crate::collections::blazemap) len: &'a mut usize,
+    pub(in crate::collections::map) len: &'a mut usize,
 
-    pub(in crate::collections::blazemap) inner: VacantEntryInner<'a, V>,
+    pub(in crate::collections::map) inner: VacantEntryInner<'a, V>,
 }
 
 #[derive(Debug)]
-pub(in crate::collections::blazemap) enum VacantEntryInner<'a, V> {
+pub(in crate::collections::map) enum VacantEntryInner<'a, V> {
     ShouldBeInserted(&'a mut Option<V>),
     ShouldBeEnlarged(&'a mut Vec<Option<V>>),
 }

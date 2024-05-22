@@ -1,5 +1,5 @@
 use crate::{
-    collections::blazemap::BlazeMap,
+    collections::map::BlazeMap,
     prelude::{BlazeMapId, BlazeMapIdStatic},
     traits::{KeyByOffsetProvider, TypeInfoContainer},
 };
@@ -17,13 +17,13 @@ use std::{
 ///
 /// [`iter`]: BlazeMap::iter
 pub struct Iter<'a, K, V> {
-    pub(in crate::collections::blazemap) inner: *const Option<V>,
+    pub(in crate::collections::map) inner: *const Option<V>,
 
-    pub(in crate::collections::blazemap) current_position: usize,
+    pub(in crate::collections::map) current_position: usize,
 
-    pub(in crate::collections::blazemap) len: usize,
+    pub(in crate::collections::map) len: usize,
 
-    pub(in crate::collections::blazemap) phantom: PhantomData<(K, &'a V)>,
+    pub(in crate::collections::map) phantom: PhantomData<(K, &'a V)>,
 }
 
 /// A mutable iterator over the entries of a [`BlazeMap`].
@@ -33,13 +33,13 @@ pub struct Iter<'a, K, V> {
 ///
 /// [`iter_mut`]: BlazeMap::iter_mut
 pub struct IterMut<'a, K, V> {
-    pub(in crate::collections::blazemap) inner: *mut Option<V>,
+    pub(in crate::collections::map) inner: *mut Option<V>,
 
-    pub(in crate::collections::blazemap) current_position: usize,
+    pub(in crate::collections::map) current_position: usize,
 
-    pub(in crate::collections::blazemap) len: usize,
+    pub(in crate::collections::map) len: usize,
 
-    pub(in crate::collections::blazemap) phantom: PhantomData<(K, &'a mut V)>,
+    pub(in crate::collections::map) phantom: PhantomData<(K, &'a mut V)>,
 }
 
 /// An iterator over the keys of a [`BlazeMap`].
@@ -49,7 +49,7 @@ pub struct IterMut<'a, K, V> {
 ///
 /// [`keys`]: BlazeMap::keys
 pub struct Keys<'a, K, V> {
-    pub(in crate::collections::blazemap) inner: Iter<'a, K, V>,
+    pub(in crate::collections::map) inner: Iter<'a, K, V>,
 }
 
 /// An iterator over the values of a [`BlazeMap`].
@@ -59,7 +59,7 @@ pub struct Keys<'a, K, V> {
 ///
 /// [`values`]: BlazeMap::values
 pub struct Values<'a, K, V> {
-    pub(in crate::collections::blazemap) inner: Iter<'a, K, V>,
+    pub(in crate::collections::map) inner: Iter<'a, K, V>,
 }
 
 /// A mutable iterator over the values of a [`BlazeMap`].
@@ -69,7 +69,7 @@ pub struct Values<'a, K, V> {
 ///
 /// [`values_mut`]: BlazeMap::values_mut
 pub struct ValuesMut<'a, K, V> {
-    pub(in crate::collections::blazemap) inner: IterMut<'a, K, V>,
+    pub(in crate::collections::map) inner: IterMut<'a, K, V>,
 }
 
 /// An owning iterator over the entries of a [`BlazeMap`].
@@ -79,7 +79,7 @@ pub struct ValuesMut<'a, K, V> {
 ///
 /// [`into_iter`]: IntoIterator::into_iter
 pub struct IntoIter<K, V> {
-    pub(in crate::collections::blazemap) inner: BlazeMap<K, V>,
+    pub(in crate::collections::map) inner: BlazeMap<K, V>,
 }
 
 /// An owning iterator over the keys of a [`BlazeMap`].
@@ -89,7 +89,7 @@ pub struct IntoIter<K, V> {
 ///
 /// [`into_keys`]: BlazeMap::into_keys
 pub struct IntoKeys<K, V> {
-    pub(in crate::collections::blazemap) inner: IntoIter<K, V>,
+    pub(in crate::collections::map) inner: IntoIter<K, V>,
 }
 
 /// An owning iterator over the values of a [`BlazeMap`].
@@ -99,7 +99,7 @@ pub struct IntoKeys<K, V> {
 ///
 /// [`into_values`]: BlazeMap::into_values
 pub struct IntoValues<K, V> {
-    pub(in crate::collections::blazemap) inner: IntoIter<K, V>,
+    pub(in crate::collections::map) inner: IntoIter<K, V>,
 }
 
 /// A draining iterator over the entries of a [`BlazeMap`].
@@ -109,9 +109,9 @@ pub struct IntoValues<K, V> {
 ///
 /// [`drain`]: BlazeMap::drain
 pub struct Drain<'a, K, V> {
-    pub(in crate::collections::blazemap) map: &'a mut BlazeMap<K, V>,
+    pub(in crate::collections::map) map: &'a mut BlazeMap<K, V>,
 
-    pub(in crate::collections::blazemap) current_position: usize,
+    pub(in crate::collections::map) current_position: usize,
 }
 
 impl<'a, K, V> Iterator for Iter<'a, K, V>
