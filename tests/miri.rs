@@ -1,4 +1,4 @@
-#![cfg(all(not(loom), feature = "serde"))]
+#![cfg(all(not(feature = "loom"), feature = "serde"))]
 
 use crate::random_action::{ActionPeekWeights, EventWeights};
 use blazemap::{define_key_wrapper, define_key_wrapper_bounded, prelude::BlazeMap};

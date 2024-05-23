@@ -1,4 +1,4 @@
-#![cfg(loom)]
+#![cfg(feature = "loom")]
 
 use blazemap::{
     define_key_wrapper, define_key_wrapper_bounded, define_plain_id,

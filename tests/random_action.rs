@@ -120,7 +120,7 @@ macro_rules! process_iter_mut_action {
             }
             while $iterator.len() != 0 {
                 let event = IterMutPeekWeights::new(&(), $rng).generate($rng);
-                #[cfg(all(miri, target = "miri_action_log"))]
+                #[cfg(all(miri, feature = "miri_action_log"))]
                 {
                     println!("{} {:?}", $log_suffix, $event);
                     std::io::stdout().flush().unwrap();
