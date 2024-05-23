@@ -11,7 +11,7 @@
 #![allow(clippy::drop_non_drop)]
 
 use blazemap::{
-    prelude::BlazeMap,
+    prelude::Map,
     traits::{BlazeMapId, BlazeMapIdStatic},
 };
 use rand::Rng;
@@ -156,7 +156,7 @@ impl Action<String, String> {
         self,
         log_suffix: &str,
         rng: &mut impl Rng,
-        map: &mut BlazeMap<I, String>,
+        map: &mut Map<I, String>,
         key_to_id: impl FnOnce(String) -> I,
     ) where
         I: BlazeMapId<OrigType = String> + BlazeMapIdStatic + Debug,
@@ -264,17 +264,17 @@ impl Action<String, String> {
                 }
             }
             Action::IntoKeys(event) => {
-                let old = std::mem::replace(map, BlazeMap::new());
+                let old = std::mem::replace(map, Map::new());
                 let mut iterator = old.into_keys();
                 process_iter_mut_action!(log_suffix, rng, event, iterator);
             }
             Action::IntoValues(event) => {
-                let old = std::mem::replace(map, BlazeMap::new());
+                let old = std::mem::replace(map, Map::new());
                 let mut iterator = old.into_values();
                 process_iter_mut_action!(log_suffix, rng, event, iterator);
             }
             Action::IntoIter(event) => {
-                let old = std::mem::replace(map, BlazeMap::new());
+                let old = std::mem::replace(map, Map::new());
                 let mut iterator = old.into_iter();
                 process_iter_mut_action!(log_suffix, rng, event, iterator);
             }
@@ -287,7 +287,7 @@ impl Action<String, String> {
                 write!(io, "{}", serde_json::to_string(&map).unwrap()).unwrap();
             }
             Action::Drop => {
-                let old = std::mem::replace(map, BlazeMap::new());
+                let old = std::mem::replace(map, Map::new());
                 drop(old);
             }
         }

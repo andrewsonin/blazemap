@@ -5,9 +5,9 @@ use crate::prelude::BlazeMapId;
 ///
 /// This enum is constructed
 /// from the [`entry`] method on
-/// [`BlazeMap`](crate::collections::map::BlazeMap).
+/// [`Map`](crate::collections::map::Map).
 ///
-/// [`entry`]: crate::collections::map::BlazeMap::entry
+/// [`entry`]: crate::collections::map::Map::entry
 pub enum Entry<'a, K, V>
 where
     K: BlazeMapId,
@@ -20,7 +20,7 @@ where
 
 #[derive(Debug)]
 /// A view into an occupied entry in a
-/// [`BlazeMap`](crate::collections::map::BlazeMap). It is part of the
+/// [`Map`](crate::collections::map::Map). It is part of the
 /// [`Entry`] enum.
 pub struct OccupiedEntry<'a, K, V>
 where
@@ -35,7 +35,7 @@ where
 
 #[derive(Debug)]
 /// A view into a vacant entry in a
-/// [`BlazeMap`](crate::collections::map::BlazeMap). It is part of the
+/// [`Map`](crate::collections::map::Map). It is part of the
 /// [`Entry`] enum.
 pub struct VacantEntry<'a, K, V>
 where

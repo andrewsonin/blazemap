@@ -1,5 +1,3 @@
-#![allow(clippy::module_name_repetitions)]
-
 pub use crate::collections::map::{
     entries::{Entry, OccupiedEntry, VacantEntry},
     iters::{Drain, IntoIter, IntoKeys, IntoValues, Iter, IterMut, Keys, Values, ValuesMut},
@@ -30,14 +28,14 @@ mod iters;
 
 /// A [`Vec`]-based analogue of a [`HashMap`](std::collections::HashMap).
 #[derive(Clone, PartialEq, Eq)]
-pub struct BlazeMap<K, V> {
+pub struct Map<K, V> {
     pub(in crate::collections::map) inner: Vec<Option<V>>,
     pub(in crate::collections::map) len: usize,
     phantom: PhantomData<K>,
 }
 
-impl<K, V> BlazeMap<K, V> {
-    /// Creates a new instance of [`BlazeMap`].
+impl<K, V> Map<K, V> {
+    /// Creates a new instance of [`Map`].
     #[inline]
     #[must_use]
     pub const fn new() -> Self {
@@ -114,7 +112,7 @@ impl<K, V> BlazeMap<K, V> {
     }
 }
 
-impl<K, V> BlazeMap<K, V>
+impl<K, V> Map<K, V>
 where
     K: BlazeMapId,
 {
@@ -189,11 +187,11 @@ where
     }
 }
 
-impl<K, V> BlazeMap<K, V>
+impl<K, V> Map<K, V>
 where
     K: BlazeMapIdStatic,
 {
-    /// Creates a new instance of [`BlazeMap`]
+    /// Creates a new instance of [`Map`]
     /// with capacity equal to the current total number of unique `K` instances.
     #[inline]
     #[must_use]
@@ -209,7 +207,7 @@ where
     }
 }
 
-impl<K, V> BlazeMap<K, V>
+impl<K, V> Map<K, V>
 where
     K: BlazeMapId,
 {
@@ -361,7 +359,7 @@ where
     }
 }
 
-impl<K, V> IntoIterator for BlazeMap<K, V>
+impl<K, V> IntoIterator for Map<K, V>
 where
     K: BlazeMapId,
 {
@@ -378,7 +376,7 @@ where
     }
 }
 
-impl<'a, K, V> IntoIterator for &'a BlazeMap<K, V>
+impl<'a, K, V> IntoIterator for &'a Map<K, V>
 where
     K: BlazeMapId,
 {
@@ -395,7 +393,7 @@ where
     }
 }
 
-impl<'a, K, V> IntoIterator for &'a mut BlazeMap<K, V>
+impl<'a, K, V> IntoIterator for &'a mut Map<K, V>
 where
     K: BlazeMapId,
 {
@@ -412,13 +410,13 @@ where
     }
 }
 
-impl<K, V> FromIterator<(K, V)> for BlazeMap<K, V>
+impl<K, V> FromIterator<(K, V)> for Map<K, V>
 where
     K: BlazeMapIdStatic,
 {
     #[inline]
     fn from_iter<T: IntoIterator<Item = (K, V)>>(iter: T) -> Self {
-        let mut result = BlazeMap::with_current_key_type_capacity();
+        let mut result = Map::with_current_key_type_capacity();
         iter.into_iter().for_each(|(key, value)| {
             result.insert(key, value);
         });
@@ -430,7 +428,7 @@ where
     }
 }
 
-impl<K, V> Default for BlazeMap<K, V>
+impl<K, V> Default for Map<K, V>
 where
     K: BlazeMapId,
 {
@@ -456,7 +454,7 @@ macro_rules! blaze_map_orig_key_blocking_iter {
     };
 }
 
-impl<K, V> Debug for BlazeMap<K, V>
+impl<K, V> Debug for Map<K, V>
 where
     K: BlazeMapIdStatic,
     <K as BlazeMapId>::OrigType: Debug,
@@ -474,7 +472,7 @@ where
 }
 
 #[cfg(feature = "serde")]
-impl<K, V> Serialize for BlazeMap<K, V>
+impl<K, V> Serialize for Map<K, V>
 where
     K: BlazeMapIdStatic,
     <K as BlazeMapId>::OrigType: Serialize,
@@ -495,7 +493,7 @@ where
 }
 
 #[cfg(feature = "serde")]
-impl<'de, K, V> Deserialize<'de> for BlazeMap<K, V>
+impl<'de, K, V> Deserialize<'de> for Map<K, V>
 where
     K: BlazeMapIdWrapper + BlazeMapIdStatic,
     <K as BlazeMapId>::OrigType: Deserialize<'de>,
@@ -520,11 +518,11 @@ where
     <K as BlazeMapId>::OrigType: Deserialize<'de>,
     V: Deserialize<'de>,
 {
-    type Value = BlazeMap<K, V>;
+    type Value = Map<K, V>;
 
     #[inline]
     fn expecting(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(formatter, "BlazeMap-compatible map")
+        write!(formatter, "`blazemap::prelude::Map`-compatible map")
     }
 
     #[inline]
@@ -532,7 +530,7 @@ where
     where
         A: MapAccess<'de>,
     {
-        let mut result = BlazeMap::with_current_key_type_capacity();
+        let mut result = Map::with_current_key_type_capacity();
 
         while let Some((key, value)) = map.next_entry::<K::OrigType, V>()? {
             let key = unsafe { K::new(K::static_container(), key) };

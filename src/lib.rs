@@ -1,4 +1,4 @@
-//! Implements a [vector-based slab-like map](prelude::BlazeMap)
+//! Implements a [vector-based slab-like map](prelude::Map)
 //! with an interface similar to that of [`HashMap`](std::collections::HashMap),
 //! and also provides tools
 //! for generating lightweight identifiers that can be type-safely used as keys
@@ -22,7 +22,7 @@ pub mod utils;
 /// Crate prelude.
 pub mod prelude {
     pub use crate::{
-        collections::map::BlazeMap,
+        collections::map::Map,
         traits::{AllInstancesIter, BlazeMapId, BlazeMapIdStatic, BlazeMapIdWrapper},
     };
 }

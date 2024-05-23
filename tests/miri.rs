@@ -1,7 +1,7 @@
 #![cfg(all(not(feature = "loom"), feature = "serde"))]
 
 use crate::random_action::{ActionPeekWeights, EventWeights};
-use blazemap::{define_key_wrapper, define_key_wrapper_bounded, prelude::BlazeMap};
+use blazemap::{define_key_wrapper, define_key_wrapper_bounded, prelude::Map};
 use rand::{prelude::StdRng, random, Rng, SeedableRng};
 use std::io::Write;
 
@@ -37,7 +37,7 @@ fn key_wrapper() {
     input_combinations.iter().copied().enumerate().for_each(
         |(i, (num_random_digits, num_actions, seed))| {
             let mut rng = StdRng::seed_from_u64(seed);
-            let mut map = BlazeMap::<Id, String>::new();
+            let mut map = Map::<Id, String>::new();
             for j in 1..=num_actions {
                 #[cfg(miri)]
                 if j % 100 == 1 {
@@ -89,7 +89,7 @@ fn key_wrapper_bounded() {
         .enumerate()
         .for_each(|(i, (num_random_digits, num_actions, seed))| {
             let mut rng = StdRng::seed_from_u64(seed);
-            let mut map = BlazeMap::<Id, String>::new();
+            let mut map = Map::<Id, String>::new();
             for j in 1..=num_actions {
                 #[cfg(miri)]
                 if j % 100 == 1 {

@@ -1,2 +1,2 @@
-/// Defines [`BlazeMap`](crate::prelude::BlazeMap).
+/// Defines [`Map`](crate::prelude::Map).
 pub mod map;

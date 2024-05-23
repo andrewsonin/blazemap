@@ -1,5 +1,5 @@
 use crate::{
-    collections::map::BlazeMap,
+    collections::map::Map,
     prelude::{BlazeMapId, BlazeMapIdStatic},
     traits::{KeyByOffsetProvider, TypeInfoContainer},
 };
@@ -10,12 +10,12 @@ use std::{
     panic::{RefUnwindSafe, UnwindSafe},
 };
 
-/// An iterator over the entries of a [`BlazeMap`].
+/// An iterator over the entries of a [`Map`].
 ///
-/// This `struct` is created by the [`iter`] method on [`BlazeMap`]. See its
+/// This `struct` is created by the [`iter`] method on [`Map`]. See its
 /// documentation for more.
 ///
-/// [`iter`]: BlazeMap::iter
+/// [`iter`]: Map::iter
 pub struct Iter<'a, K, V> {
     pub(in crate::collections::map) inner: *const Option<V>,
 
@@ -26,12 +26,12 @@ pub struct Iter<'a, K, V> {
     pub(in crate::collections::map) phantom: PhantomData<(K, &'a V)>,
 }
 
-/// A mutable iterator over the entries of a [`BlazeMap`].
+/// A mutable iterator over the entries of a [`Map`].
 ///
-/// This `struct` is created by the [`iter_mut`] method on [`BlazeMap`]. See its
+/// This `struct` is created by the [`iter_mut`] method on [`Map`]. See its
 /// documentation for more.
 ///
-/// [`iter_mut`]: BlazeMap::iter_mut
+/// [`iter_mut`]: Map::iter_mut
 pub struct IterMut<'a, K, V> {
     pub(in crate::collections::map) inner: *mut Option<V>,
 
@@ -42,74 +42,74 @@ pub struct IterMut<'a, K, V> {
     pub(in crate::collections::map) phantom: PhantomData<(K, &'a mut V)>,
 }
 
-/// An iterator over the keys of a [`BlazeMap`].
+/// An iterator over the keys of a [`Map`].
 ///
-/// This `struct` is created by the [`keys`] method on [`BlazeMap`]. See its
+/// This `struct` is created by the [`keys`] method on [`Map`]. See its
 /// documentation for more.
 ///
-/// [`keys`]: BlazeMap::keys
+/// [`keys`]: Map::keys
 pub struct Keys<'a, K, V> {
     pub(in crate::collections::map) inner: Iter<'a, K, V>,
 }
 
-/// An iterator over the values of a [`BlazeMap`].
+/// An iterator over the values of a [`Map`].
 ///
-/// This `struct` is created by the [`values`] method on [`BlazeMap`]. See its
+/// This `struct` is created by the [`values`] method on [`Map`]. See its
 /// documentation for more.
 ///
-/// [`values`]: BlazeMap::values
+/// [`values`]: Map::values
 pub struct Values<'a, K, V> {
     pub(in crate::collections::map) inner: Iter<'a, K, V>,
 }
 
-/// A mutable iterator over the values of a [`BlazeMap`].
+/// A mutable iterator over the values of a [`Map`].
 ///
-/// This `struct` is created by the [`values_mut`] method on [`BlazeMap`]. See
+/// This `struct` is created by the [`values_mut`] method on [`Map`]. See
 /// its documentation for more.
 ///
-/// [`values_mut`]: BlazeMap::values_mut
+/// [`values_mut`]: Map::values_mut
 pub struct ValuesMut<'a, K, V> {
     pub(in crate::collections::map) inner: IterMut<'a, K, V>,
 }
 
-/// An owning iterator over the entries of a [`BlazeMap`].
+/// An owning iterator over the entries of a [`Map`].
 ///
-/// This `struct` is created by the [`into_iter`] method on [`BlazeMap`]
+/// This `struct` is created by the [`into_iter`] method on [`Map`]
 /// (provided by the [`IntoIterator`] trait). See its documentation for more.
 ///
 /// [`into_iter`]: IntoIterator::into_iter
 pub struct IntoIter<K, V> {
-    pub(in crate::collections::map) inner: BlazeMap<K, V>,
+    pub(in crate::collections::map) inner: Map<K, V>,
 }
 
-/// An owning iterator over the keys of a [`BlazeMap`].
+/// An owning iterator over the keys of a [`Map`].
 ///
-/// This `struct` is created by the [`into_keys`] method on [`BlazeMap`].
+/// This `struct` is created by the [`into_keys`] method on [`Map`].
 /// See its documentation for more.
 ///
-/// [`into_keys`]: BlazeMap::into_keys
+/// [`into_keys`]: Map::into_keys
 pub struct IntoKeys<K, V> {
     pub(in crate::collections::map) inner: IntoIter<K, V>,
 }
 
-/// An owning iterator over the values of a [`BlazeMap`].
+/// An owning iterator over the values of a [`Map`].
 ///
-/// This `struct` is created by the [`into_values`] method on [`BlazeMap`].
+/// This `struct` is created by the [`into_values`] method on [`Map`].
 /// See its documentation for more.
 ///
-/// [`into_values`]: BlazeMap::into_values
+/// [`into_values`]: Map::into_values
 pub struct IntoValues<K, V> {
     pub(in crate::collections::map) inner: IntoIter<K, V>,
 }
 
-/// A draining iterator over the entries of a [`BlazeMap`].
+/// A draining iterator over the entries of a [`Map`].
 ///
-/// This `struct` is created by the [`drain`] method on [`BlazeMap`]. See its
+/// This `struct` is created by the [`drain`] method on [`Map`]. See its
 /// documentation for more.
 ///
-/// [`drain`]: BlazeMap::drain
+/// [`drain`]: Map::drain
 pub struct Drain<'a, K, V> {
-    pub(in crate::collections::map) map: &'a mut BlazeMap<K, V>,
+    pub(in crate::collections::map) map: &'a mut Map<K, V>,
 
     pub(in crate::collections::map) current_position: usize,
 }
@@ -323,7 +323,7 @@ where
 
     #[inline]
     fn next(&mut self) -> Option<(K, V)> {
-        let BlazeMap { inner, len, .. } = &mut self.inner;
+        let Map { inner, len, .. } = &mut self.inner;
         while let Some(back) = inner.pop() {
             if let Some(value) = back {
                 let key = unsafe { K::from_offset_unchecked(inner.len()) };
@@ -353,7 +353,7 @@ where
 
     #[inline]
     fn next(&mut self) -> Option<K> {
-        let BlazeMap { inner, len, .. } = &mut self.inner.inner;
+        let Map { inner, len, .. } = &mut self.inner.inner;
         while let Some(back) = inner.pop() {
             if back.is_some() {
                 let key = unsafe { K::from_offset_unchecked(inner.len()) };
@@ -380,7 +380,7 @@ impl<K, V> Iterator for IntoValues<K, V> {
 
     #[inline]
     fn next(&mut self) -> Option<V> {
-        let BlazeMap { inner, len, .. } = &mut self.inner.inner;
+        let Map { inner, len, .. } = &mut self.inner.inner;
         while let Some(back) = inner.pop() {
             if let Some(value) = back {
                 *len -= 1;

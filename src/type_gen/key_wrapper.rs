@@ -34,7 +34,7 @@
 /// # Example
 ///
 /// ```rust
-/// use blazemap::{prelude::BlazeMap, define_key_wrapper};
+/// use blazemap::{prelude::Map, define_key_wrapper};
 ///
 /// define_key_wrapper! {
 ///     pub struct Key(&'static str);
@@ -51,7 +51,7 @@
 /// let key_2 = Key::new("second");
 /// let key_3 = Key::new("third");
 ///
-/// let mut map = BlazeMap::new();
+/// let mut map = Map::new();
 /// map.insert(key_2, "2");
 /// map.insert(key_1, "1");
 /// map.insert(key_3, "3");

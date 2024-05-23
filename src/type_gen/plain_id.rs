@@ -18,7 +18,7 @@
 /// # Example
 ///
 /// ```rust
-/// use blazemap::{prelude::BlazeMap, define_plain_id};
+/// use blazemap::{prelude::Map, define_plain_id};
 ///
 /// define_plain_id! {
 ///     pub struct Id;
@@ -31,7 +31,7 @@
 /// let key_2 = Id::new();
 /// let key_3 = Id::new();
 ///
-/// let mut map = BlazeMap::new();
+/// let mut map = Map::new();
 /// map.insert(key_2, "2");
 /// map.insert(key_1, "1");
 /// map.insert(key_3, "3");
